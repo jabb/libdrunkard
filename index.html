@@ -66,6 +66,137 @@ drunkard_destroy(drunk);
 <li>libdrunkard's marks tiles only relative to the current position and target of the drunk. When you're carving, at some point you should <strong>always</strong> target a random open tile and head towards it. There are always exceptions of course, but this is a good rule so you can be sure your drunk connects to a walkable area.</li>
 <li>libdrunkard's main stepping function uses a weight to calculate how stumbly the drunk will be. The weight is on a scale from 0.0 to 1.0. A value of 0.0 means the drunk will move directly away from his target, a value of 1.0 will mean directory towards, and a value of 0.5 means he'll just randomly walk around. I like values between 0.6 and 0.9 to be sure the drunk reaches his target.</li>
 </ul><h3>Function Documentation</h3>
+
+<h2>Drunk Creation/Destruction</h2>
+
+<pre><code>struct drunkard *drunkard_create(unsigned *tiles, unsigned width, unsigned height);
+void drunkard_destroy(struct drunkard *drunk);
+</code></pre>
+
+<p>In order to use the drunk, you have to create him. He takes a pointer to an array of unsigned integers. These integers will mostly likely be key-lookups to table of your real tiles. <code>drunkard_create</code> returns <code>NULL</code> only if there is no memory left. After you're done, be sure to destroy it, freeing any resources.</p>
+
+<h2>Core Functions</h2>
+
+<pre><code>bool drunkard_is_opened(struct drunkard *drunk, int x, int y);
+void drunkard_set_open_threshold(struct drunkard *drunk, unsigned threshold);
+void drunkard_mark(struct drunkard *drunk, int x, int y, unsigned tile);
+void drunkard_flush_marks(struct drunkard *drunk);
+</code></pre>
+
+<p><code>drunkard_is_opened</code> checks the tile at <code>x, y</code> and returns true if it is opened (walkable).</p>
+
+<p><code>drunkard_set_open_threshold</code> sets the threshold for open tiles. Anything greater than or equal to this number are considered by the drunk walkable.</p>
+
+<p><code>drunkard_mark</code> marks a tile. If the tile is an open one (walkable), it is added to the list of marked tiles. If the tile is closed (unwalkable), it is removed from the list of open tiles and list marked tiles.</p>
+
+<p><code>drunkard_flush_marks</code> flushes all the marked tiles to the list of open tiles. The marked list is then cleared.</p>
+
+<h2>Querying Functions</h2>
+
+<pre><code>unsigned drunkard_count_opened(struct drunkard *drunk);
+double drunkard_percent_opened(struct drunkard *drunk);
+void drunkard_random_opened(struct drunkard *drunk, unsigned *x, unsigned *y);
+
+int drunkard_get_x(struct drunkard *drunk);
+int drunkard_get_y(struct drunkard *drunk);
+int drunkard_get_target_x(struct drunkard *drunk);
+int drunkard_get_target_y(struct drunkard *drunk);
+int drunkard_get_dx_to_target(struct drunkard *drunk);
+int drunkard_get_dy_to_target(struct drunkard *drunk);
+</code></pre>
+
+<p><code>drunkard_count_opened</code> returns the number of opened tiles on the map. (Doesn't include marked.)</p>
+
+<p><code>drunkard_percent_opened</code> returns the percent of the tiles opened on the map. Half the map opened would be 0.5.</p>
+
+<p><code>drunkard_random_opened</code> sets <code>x</code> and <code>y</code> to a random opened point on the map. (Doesn't include marked.)</p>
+
+<p>The rest of the functions should be self explanatory.</p>
+
+<h2>Random Number Generation</h2>
+
+<pre><code>unsigned drunkard_get_seed(struct drunkard *drunk);
+void drunkard_seed(struct drunkard *drunk, unsigned s);
+double drunkard_rng_uniform(struct drunkard *drunk);
+double drunkard_rng_under(struct drunkard *drunk, unsigned limit);
+int drunkard_rng_range(struct drunkard *drunk, int low, int high);
+bool drunkard_rng_chance(struct drunkard *drunk, double d);
+</code></pre>
+
+<p><code>drunkard_get_seed</code> returns the current seed.</p>
+
+<p><code>drunkard_seed</code> sets the current seed.</p>
+
+<p><code>drunkard_rng_uniform</code> returns a double in the range [0, 1).</p>
+
+<p><code>drunkard_rng_under</code> returns a double in the range [0, limit).</p>
+
+<p><code>drunkard_rng_range</code> returns an int in the range [low, high].</p>
+
+<p><code>drunkard_rng_chance</code> returns true <code>d</code> percent of the time.</p>
+
+<h2>Starting/Targeting Functions</h2>
+
+<pre><code>void drunkard_start_fixed(struct drunkard *drunk, int x, int y);
+void drunkard_start_random(struct drunkard *drunk);
+void drunkard_start_random_west(struct drunkard *drunk);
+void drunkard_start_random_east(struct drunkard *drunk);
+void drunkard_start_random_north(struct drunkard *drunk);
+void drunkard_start_random_south(struct drunkard *drunk);
+void drunkard_start_random_west_edge(struct drunkard *drunk);
+void drunkard_start_random_east_edge(struct drunkard *drunk);
+void drunkard_start_random_north_edge(struct drunkard *drunk);
+void drunkard_start_random_south_edge(struct drunkard *drunk);
+void drunkard_start_random_westeast_edge(struct drunkard *drunk);
+void drunkard_start_random_northsouth_edge(struct drunkard *drunk);
+void drunkard_start_random_edge(struct drunkard *drunk);
+void drunkard_start_random_opened(struct drunkard *drunk);
+
+void drunkard_target_fixed(struct drunkard *drunk, int x, int y);
+void drunkard_target_random_west_edge(struct drunkard *drunk);
+void drunkard_target_random_east_edge(struct drunkard *drunk);
+void drunkard_target_random_north_edge(struct drunkard *drunk);
+void drunkard_target_random_south_edge(struct drunkard *drunk);
+void drunkard_target_random_westeast_edge(struct drunkard *drunk);
+void drunkard_target_random_northsouth_edge(struct drunkard *drunk);
+void drunkard_target_random_edge(struct drunkard *drunk);
+void drunkard_target_random_opened(struct drunkard *drunk);
+</code></pre>
+
+<h2>Marking Functions</h2>
+
+<pre><code>void drunkard_mark_all(struct drunkard *drunk, unsigned tile);
+void drunkard_mark_1(struct drunkard *drunk, unsigned tile);
+void drunkard_mark_plus(struct drunkard *drunk, unsigned tile);
+void drunkard_mark_x(struct drunkard *drunk, unsigned tile);
+void drunkard_mark_rect(struct drunkard *drunk, int hw, int hh, unsigned tile);
+bool drunkard_try_mark_rect(struct drunkard *drunk, int hw, int hh, unsigned tile);
+unsigned drunkard_mark_shrinking_square(struct drunkard *drunk, int min, int max, unsigned tile);
+void drunkard_mark_circle(struct drunkard *drunk, int r, unsigned tile);
+bool drunkard_try_mark_circle(struct drunkard *drunk, int r, unsigned tile);
+unsigned drunkard_mark_shrinking_circle(struct drunkard *drunk, int min, int max, unsigned tile);
+</code></pre>
+
+<h2>Stepping Functions</h2>
+
+<pre><code>void drunkard_step_by(struct drunkard *drunk, int dx, int dy);
+void drunkard_step_random(struct drunkard *drunk);
+void drunkard_step_to_target(struct drunkard *drunk, double weight);
+
+void drunkard_line_path_to_target(struct drunkard *drunk);
+void drunkard_tunnel_path_to_target(struct drunkard *drunk);
+bool drunkard_walk_path(struct drunkard *drunk);
+void drunkard_cancel_path(struct drunkard *drunk);
+</code></pre>
+
+<h2>Checking Functions</h2>
+
+<pre><code>bool drunkard_is_on_opened(struct drunkard *drunk);
+bool drunkard_is_on_target(struct drunkard *drunk);
+bool drunkard_is_on_fixed(struct drunkard *drunk, int x, int y);
+bool drunkard_is_on_fixed_x(struct drunkard *drunk, int x);
+bool drunkard_is_on_fixed_y(struct drunkard *drunk, int y);
+</code></pre>
       </section>
       <footer>
         <p>This project is maintained by <a href="https://github.com/jabb">jabb</a></p>
