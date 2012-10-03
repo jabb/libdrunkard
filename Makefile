@@ -15,6 +15,7 @@ libdrunkard.a: $(OBJS)
 examples: libdrunkard.a
 	$(CC) $(CFLAGS) examples/cave.c $(LDFLAGS) -L./lib -ldrunkard -o examples/cave
 	$(CC) $(CFLAGS) examples/dung.c $(LDFLAGS) -L./lib -ldrunkard -o examples/dung
+	$(CC) $(CFLAGS) examples/atw.c $(LDFLAGS) -L./lib -ldrunkard -o examples/atw
 
 install:
 	mv include/drunkard.h /usr/include

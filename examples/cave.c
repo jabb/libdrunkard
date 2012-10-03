@@ -78,6 +78,9 @@ int main(void)
     /* Finally, let's output our map! */
     output_map(map);
 
+    /* Always destroy the drunk when you're done with him! */
+    drunkard_destroy(drunk);
+
     return 0;
 }
 
