@@ -170,11 +170,7 @@ void drunkard_mark_1(struct drunkard *drunk, unsigned tile);
 void drunkard_mark_plus(struct drunkard *drunk, unsigned tile);
 void drunkard_mark_x(struct drunkard *drunk, unsigned tile);
 void drunkard_mark_rect(struct drunkard *drunk, int hw, int hh, unsigned tile);
-bool drunkard_try_mark_rect(struct drunkard *drunk, int hw, int hh, unsigned tile);
-unsigned drunkard_mark_shrinking_square(struct drunkard *drunk, int min, int max, unsigned tile);
 void drunkard_mark_circle(struct drunkard *drunk, int r, unsigned tile);
-bool drunkard_try_mark_circle(struct drunkard *drunk, int r, unsigned tile);
-unsigned drunkard_mark_shrinking_circle(struct drunkard *drunk, int min, int max, unsigned tile);
 </code></pre>
 
 <h3>Stepping Functions</h3>
@@ -192,6 +188,8 @@ void drunkard_cancel_path(struct drunkard *drunk);
 <h3>Checking Functions</h3>
 
 <pre><code>bool drunkard_is_on_opened(struct drunkard *drunk);
+bool drunkard_is_opened_on_rect(struct drunkard *drunk, unsigned hw, unsigned hh);
+bool drunkard_is_opened_on_circle(struct drunkard *drunk, unsigned r);
 bool drunkard_is_on_target(struct drunkard *drunk);
 bool drunkard_is_on_fixed(struct drunkard *drunk, int x, int y);
 bool drunkard_is_on_fixed_x(struct drunkard *drunk, int x);
