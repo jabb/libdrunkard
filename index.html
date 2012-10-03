@@ -1,38 +1,41 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
+
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>libdrunkard by jabb</title>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="libdrunkard : Drunkard's Walk 2D Map Generator" />
 
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>libdrunkard</title>
   </head>
+
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>libdrunkard</h1>
-        <p>Drunkard's Walk 2D Map Generator</p>
 
-        <p class="view"><a href="https://github.com/jabb/libdrunkard">View the Project on GitHub <small>jabb/libdrunkard</small></a></p>
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/jabb/libdrunkard">View on GitHub</a>
 
+          <h1 id="project_title">libdrunkard</h1>
+          <h2 id="project_tagline">Drunkard's Walk 2D Map Generator</h2>
 
-        <ul>
-          <li><a href="https://github.com/jabb/libdrunkard/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/jabb/libdrunkard/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/jabb/libdrunkard">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/jabb/libdrunkard/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/jabb/libdrunkard/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
         <h2>A Drunk Introduction</h2>
 
 <p>If you're looking to procedurally generate 2D maps, libdrunkard may be what you're looking for. This library uses a fine tuned drunkard's walk alogirithm (see: <a href="http://en.wikipedia.org/wiki/Random_walk">http://en.wikipedia.org/wiki/Random_walk</a>). Basically, you'll have a walker (or a drunk, as this library calls it) who walks around the map carving tunnels and various other structures.</p>
 
-<p>Here are some good examples of what you can create (quite simply too!):</p>
+<p>Here are some good examples of what you can create (quite simply too! see examples/screen_shotter):</p>
 
 <table width="100%" border="0">
 <tr>
@@ -250,12 +253,17 @@ bool drunkard_is_on_fixed_y(struct drunkard *drunk, int y);
 
 <p><code>drunkard_is_on_fixed_y</code> returns true when the drunkard's <code>y</code> location is equal to the passed y location.</p>
       </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/jabb">jabb</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">libdrunkard maintained by <a href="https://github.com/jabb">jabb</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
       </footer>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
+
     
+
   </body>
 </html>
