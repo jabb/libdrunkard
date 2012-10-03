@@ -16,6 +16,10 @@ examples: libdrunkard.a
 	$(CC) $(CFLAGS) examples/cave.c $(LDFLAGS) -L./lib -ldrunkard -o examples/cave
 	$(CC) $(CFLAGS) examples/dung.c $(LDFLAGS) -L./lib -ldrunkard -o examples/dung
 
+install:
+	mv include/drunkard.h /usr/include
+	mv lib/libdrunkard.a /usr/lib
+
 clean:
 	@rm -f lib/*.a
 	@rm -f src/*.o
