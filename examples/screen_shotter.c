@@ -279,8 +279,8 @@ void generate_dungeon(struct drunkard *w)
     drunkard_flush_marks(w);
 
     carve_seed(w);
-    int tries = HEIGHT;
-    while (drunkard_percent_opened(w) < 0.5 && tries --> 0)
+    int tries = HEIGHT * HEIGHT;
+    while (drunkard_percent_opened(w) < 0.55 && tries --> 0)
         carve(w);
 
     post_carve(w);
