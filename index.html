@@ -28,7 +28,7 @@
         </ul>
       </header>
       <section>
-        <h3>A Drunk Introduction</h3>
+        <h2>A Drunk Introduction</h2>
 
 <p>If you're looking to procedurally generate 2D maps, libdrunkard may be what you're looking for. This library uses a fine tuned drunkard's walk alogirithm (see: <a href="http://en.wikipedia.org/wiki/Random_walk">http://en.wikipedia.org/wiki/Random_walk</a>). Basically, you'll have a walker (or a drunk, as this library calls it) who walks around the map carving tunnels and various other structures.</p>
 
@@ -36,13 +36,13 @@
 
 <p><img src="http://dl.dropbox.com/u/11665683/drunkard1.png" alt="libdrunkard"></p>
 
-<h3>Compiling Drunkard</h3>
+<h2>Compiling Drunkard</h2>
 
 <p>On most systems, you can simply do <code>make &amp;&amp; make install</code> to get the library working on your computer. The library itself is very small, 57kb with debugging enabled.</p>
 
 <p>If the libdrunkard fails to compile on your system, feel free to contact me at my GitHub: <a href="https://github.com/jabb" class="user-mention">@jabb</a>.</p>
 
-<h3>Using Drunkard</h3>
+<h2>Using Drunkard</h2>
 
 <p>In order to use libdrunkard, all you need to do is include the header file <code>&lt;dunkard.h&gt;</code> and link against the library by passing <code>-ldrunkard</code> to GCC, or some other compiler. After that you need to have your map already defined and then you can create your drunk. The map needs to be an array or multidimensional array of unsigned numbers, if multidimensional, height must be indexed first, like below:</p>
 
@@ -65,9 +65,9 @@ drunkard_destroy(drunk);
 <li>libdrunkard keeps a list of tiles that have been opened and tiles that might be opened after a flush, the latter are called marks. "Marking" tiles is the preferable way to set tiles during a carving process, that way any tiles that open up don't confuse the drunkard thinking he's found the main tunnel system. There are various marking functions, but only one way to flush them: <code>drunkard_flush_marks</code>. Flush only when you're absolutely sure you've connected with the rest of your walkable area, or you know you can get back to the disconnected area.</li>
 <li>libdrunkard's marks tiles only relative to the current position and target of the drunk. When you're carving, at some point you should <strong>always</strong> target a random open tile and head towards it. There are always exceptions of course, but this is a good rule so you can be sure your drunk connects to a walkable area.</li>
 <li>libdrunkard's main stepping function uses a weight to calculate how stumbly the drunk will be. The weight is on a scale from 0.0 to 1.0. A value of 0.0 means the drunk will move directly away from his target, a value of 1.0 will mean directory towards, and a value of 0.5 means he'll just randomly walk around. I like values between 0.6 and 0.9 to be sure the drunk reaches his target.</li>
-</ul><h3>Function Documentation</h3>
+</ul><h2>Function Documentation</h2>
 
-<h2>Drunk Creation/Destruction</h2>
+<h3>Drunk Creation/Destruction</h3>
 
 <pre><code>struct drunkard *drunkard_create(unsigned *tiles, unsigned width, unsigned height);
 void drunkard_destroy(struct drunkard *drunk);
@@ -75,7 +75,7 @@ void drunkard_destroy(struct drunkard *drunk);
 
 <p>In order to use the drunk, you have to create him. He takes a pointer to an array of unsigned integers. These integers will mostly likely be key-lookups to table of your real tiles. <code>drunkard_create</code> returns <code>NULL</code> only if there is no memory left. After you're done, be sure to destroy it, freeing any resources.</p>
 
-<h2>Core Functions</h2>
+<h3>Core Functions</h3>
 
 <pre><code>bool drunkard_is_opened(struct drunkard *drunk, int x, int y);
 void drunkard_set_open_threshold(struct drunkard *drunk, unsigned threshold);
@@ -91,7 +91,7 @@ void drunkard_flush_marks(struct drunkard *drunk);
 
 <p><code>drunkard_flush_marks</code> flushes all the marked tiles to the list of open tiles. The marked list is then cleared.</p>
 
-<h2>Querying Functions</h2>
+<h3>Querying Functions</h3>
 
 <pre><code>unsigned drunkard_count_opened(struct drunkard *drunk);
 double drunkard_percent_opened(struct drunkard *drunk);
@@ -113,7 +113,7 @@ int drunkard_get_dy_to_target(struct drunkard *drunk);
 
 <p>The rest of the functions should be self explanatory.</p>
 
-<h2>Random Number Generation</h2>
+<h3>Random Number Generation</h3>
 
 <pre><code>unsigned drunkard_get_seed(struct drunkard *drunk);
 void drunkard_seed(struct drunkard *drunk, unsigned s);
@@ -135,7 +135,7 @@ bool drunkard_rng_chance(struct drunkard *drunk, double d);
 
 <p><code>drunkard_rng_chance</code> returns true <code>d</code> percent of the time.</p>
 
-<h2>Starting/Targeting Functions</h2>
+<h3>Starting/Targeting Functions</h3>
 
 <pre><code>void drunkard_start_fixed(struct drunkard *drunk, int x, int y);
 void drunkard_start_random(struct drunkard *drunk);
@@ -163,7 +163,7 @@ void drunkard_target_random_edge(struct drunkard *drunk);
 void drunkard_target_random_opened(struct drunkard *drunk);
 </code></pre>
 
-<h2>Marking Functions</h2>
+<h3>Marking Functions</h3>
 
 <pre><code>void drunkard_mark_all(struct drunkard *drunk, unsigned tile);
 void drunkard_mark_1(struct drunkard *drunk, unsigned tile);
@@ -177,7 +177,7 @@ bool drunkard_try_mark_circle(struct drunkard *drunk, int r, unsigned tile);
 unsigned drunkard_mark_shrinking_circle(struct drunkard *drunk, int min, int max, unsigned tile);
 </code></pre>
 
-<h2>Stepping Functions</h2>
+<h3>Stepping Functions</h3>
 
 <pre><code>void drunkard_step_by(struct drunkard *drunk, int dx, int dy);
 void drunkard_step_random(struct drunkard *drunk);
@@ -189,7 +189,7 @@ bool drunkard_walk_path(struct drunkard *drunk);
 void drunkard_cancel_path(struct drunkard *drunk);
 </code></pre>
 
-<h2>Checking Functions</h2>
+<h3>Checking Functions</h3>
 
 <pre><code>bool drunkard_is_on_opened(struct drunkard *drunk);
 bool drunkard_is_on_target(struct drunkard *drunk);
