@@ -37,42 +37,44 @@ int main(void)
     /* First he'll start on a random place on the map. */
     drunkard_start_random(drunk);
     /* Then he marks the spot he's on at a "FLOOR", which the drunk knows is
-     * walkable.
+     * walkable. Let's mark a room. The 3's are half widths and half heights, so
+     * the room will be 7x7.
      */
-    drunkard_mark_1(drunk, FLOOR);
+    drunkard_mark_rect(drunk, 3, 3, FLOOR);
     /* Now we have to "flush" the changes. I'll talk more about what flushing
      * does later.
      */
     drunkard_flush_marks(drunk);
 
     /* Now we have our seed, we can start carving does cool maps. We're going
-     * to carve a VERY simple cave. The drunk will only carve once.
+     * to carve a VERY simple dungeon. The drunk will only carve once.
      */
      /* Start in a random location. */
     drunkard_start_random(drunk);
-     /* Here's where we use our drunk's knowledge to target a place he knows
-      * he can walk. This will target our seed, since it's the only open tile.
+    /* Here's where we use our drunk's knowledge to target a place he knows
+      * he can walk. This will target one of our seed tiles.
       */
     drunkard_target_random_opened(drunk);
 
-     /* Here's the tricky part. We're going to walk towards our target until we
-      * reach it or until we come across another open tile (hardly!).
+    /* Lets marks a room before we start walking. */
+    drunkard_mark_rect(drunk, 2, 2, FLOOR);
+
+    /* Here's the tricky part. We're going to generate a corridor path and
+      * walk along it until we reach our target or until we encounter an open
+      * tile.
       */
-    while (!drunkard_is_on_target(drunk) || !drunkard_is_on_opened(drunk))
+    drunkard_tunnel_path_to_target(drunk);
+    /* dunkard_walk_path will move the drunk along the path until we're at the
+     * end, then it returns false.
+     */
+    while (drunkard_walk_path(drunk))
     {
-        /* Mark a plus symbol of FLOORs. The plus is a cool way to carve through
-         * a map. It doesn't ever leave tight diagonals to maneuver around, and
-         * it's quite spacious!
-         */
-        drunkard_mark_plus(drunk, FLOOR);
-        /* We can step to the target in a variety of ways and with different
-         * weights. The weight value goes from 0 to 1. 0 basically means the
-         * drunk will be moving AWAY from his target. 1 will cause the drunk
-         * to go straight towards his target. And 0.5 he'll wander aimlessly,
-         * and may never reach his target. I like a value from 0.6 to 0.9. We'll
-         * use 0.6 for drunk that wanders a lot.
-         */
-        drunkard_step_to_target(drunk, 0.6);
+        /* Our check if we landed on a stopping point. */
+        if (drunkard_is_on_opened(drunk))
+            break;
+
+        /* Make a single tile where we're standing. */
+        drunkard_mark_1(drunk, FLOOR);
     }
 
     /* Finally, let's output our map! */
