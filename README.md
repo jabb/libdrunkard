@@ -1,4 +1,4 @@
-libwalker
-=========
+libdrunkard
+===========
 
-Specialized random walker to procedurally generate all kinds of 2D maps.
+Specialized drunkard's walk algorithm to procedurally generate all kinds of 2D maps.

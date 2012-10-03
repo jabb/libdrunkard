@@ -75,6 +75,9 @@ int main(void)
 
         /* Make a single tile where we're standing. */
         drunkard_mark_1(drunk, FLOOR);
+
+
+        drunkard_tunnel_path_to_target(drunk);
     }
 
     /* Finally, let's output our map! */
