@@ -170,6 +170,10 @@ void drunkard_target_random_edge(struct drunkard *drunk);
 void drunkard_target_random_opened(struct drunkard *drunk);
 </code></pre>
 
+<p><code>drunkard_start_*</code> functions set the <code>x, y</code> location of the drunk. <code>drunkard_start_random_west</code> sets the drunk's <code>x, y</code> location to a random location on the west side of the map (x &gt;= WIDTH/2). <code>*_edge</code> functions are on the outermost edge of the map.</p>
+
+<p><code>drunkard_target_*</code> functions behave exactly like the <code>drunkard_start_*</code> functions, except the set the drunk's target location. Note: <code>drunkard_target_random_opened</code> is probably the most important since you always want to try to connect to the rest of your carved area. </p>
+
 <h3>Marking Functions</h3>
 
 <pre><code>void drunkard_mark_all(struct drunkard *drunk, unsigned tile);
@@ -180,6 +184,18 @@ void drunkard_mark_rect(struct drunkard *drunk, int hw, int hh, unsigned tile);
 void drunkard_mark_circle(struct drunkard *drunk, int r, unsigned tile);
 </code></pre>
 
+<p><code>drunkard_mark_all</code> marks every tile on the map. The locations on the map are set to <code>tile</code>.</p>
+
+<p><code>drunkard_mark_1</code> marks the tile the drunk is standing on. The location on the map are set to <code>tile</code>.</p>
+
+<p><code>drunkard_mark_plus</code> marks a plus sign at the drunk's location. A plus sign is the current tile the drunk is standing on and four additional tiles in each cardinal direction from the origin. The locations on the map are set to <code>tile</code>.</p>
+
+<p><code>drunkard_mark_x</code> marks an X at the drunk's location. An X is the current tile the drunk is standing on and four addition tiles in each intermediate direction from the origin. The locations on the map are set to <code>tile</code>.</p>
+
+<p><code>drunk_mark_rect</code> marks a rectangle, where the center is at the drunk's location. It's important to note that the integers passed are half the width and height. So passing <code>3, 3</code> results in a 7x7 rectangle.</p>
+
+<p><code>drunk_mark_circle</code> marks a circle, where the center is at the drunk's location. The locations on the map are set to <code>tile</code>.</p>
+
 <h3>Stepping Functions</h3>
 
 <pre><code>void drunkard_step_by(struct drunkard *drunk, int dx, int dy);
@@ -189,8 +205,23 @@ void drunkard_step_to_target(struct drunkard *drunk, double weight);
 void drunkard_line_path_to_target(struct drunkard *drunk);
 void drunkard_tunnel_path_to_target(struct drunkard *drunk);
 bool drunkard_walk_path(struct drunkard *drunk);
-void drunkard_cancel_path(struct drunkard *drunk);
 </code></pre>
+
+<p>When the drunk has a starting location and a target, he needs a way to get there. Stepping functions help. There are even pathing functions to plan out a very specific path to the target. All the stepping only occurs in four directions, six and eight-directional support is planned.</p>
+
+<p><code>drunkard_step_by</code> has the drunk step by delta x and delta y values.</p>
+
+<p><code>drunkard_step_random</code> just steps randomly in four directions.</p>
+
+<p><code>drunkard_step_to_target</code> a weighted step towards the target. Only moves in four directions.</p>
+
+<p>Pathing functions:</p>
+
+<p><code>drunkard_line_path_to_target</code> plans a straight line to the target.</p>
+
+<p><code>drunkard_tunnel_path_to_target</code> the classic corridor. The choice between going horizontal or vertical first is random (50/50 chance).</p>
+
+<p><code>drunkard_walk_path</code> walks along the planned path. Returns false when the drunk is at the end, or in other words: on the target.</p>
 
 <h3>Checking Functions</h3>
 
@@ -202,6 +233,22 @@ bool drunkard_is_on_fixed(struct drunkard *drunk, int x, int y);
 bool drunkard_is_on_fixed_x(struct drunkard *drunk, int x);
 bool drunkard_is_on_fixed_y(struct drunkard *drunk, int y);
 </code></pre>
+
+<p>These are good for breaking out of loops or checking an area to see if it's clear before building on it.</p>
+
+<p><code>drunkard_is_on_opened</code> returns true if the drunk is standing on an open tile (walkable).</p>
+
+<p><code>drunkard_is_opened_on_rect</code> returns true if any of the tiles in a rectangle area around the drunk are open.</p>
+
+<p><code>drunkard_is_opened_on_circle</code> return true if any of the tiles on a circle area around the drunk are open.</p>
+
+<p><code>drunkard_is_on_target</code> returns true when the drunkard's <code>x, y</code> location is equal to the drunk's <code>target x, target y</code> location.</p>
+
+<p><code>drunkard_is_on_fixed</code> returns true when the drunkard's <code>x, y</code> location is equal to the passed location.</p>
+
+<p><code>drunkard_is_on_fixed_x</code> returns true when the drunkard's <code>x</code> location is equal to the passed x location.</p>
+
+<p><code>drunkard_is_on_fixed_y</code> returns true when the drunkard's <code>y</code> location is equal to the passed y location.</p>
       </section>
       <footer>
         <p>This project is maintained by <a href="https://github.com/jabb">jabb</a></p>
