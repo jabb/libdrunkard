@@ -71,7 +71,7 @@ int carve_shrinking_square(struct drunkard *drunk, int min, int max, unsigned ti
 
     if (!marked)
     {
-        drunkard_mark_rect(drunk, max, max, tile);
+        drunkard_mark_rect(drunk, max + 1, max + 1, tile);
         return max + 1;
     }
     return 0;
@@ -88,7 +88,7 @@ int carve_shrinking_circle(struct drunkard *drunk, int min, int max, unsigned ti
 
     if (!marked)
     {
-        drunkard_mark_circle(drunk, max, tile);
+        drunkard_mark_circle(drunk, max + 1, tile);
         /* + 1 for the max--; in the loop */
         return max + 1;
     }
@@ -110,9 +110,9 @@ void carve_room_and_corridor(struct drunkard *w)
     int marked;
 
     if (drunkard_rng_chance(w, 0.5))
-        marked = carve_shrinking_square(w, 2, 8, STONE_FLOOR);
+        marked = carve_shrinking_square(w, 3, 8, STONE_FLOOR);
     else
-        marked = carve_shrinking_circle(w, 2, 8, STONE_FLOOR);
+        marked = carve_shrinking_circle(w, 3, 8, STONE_FLOOR);
 
     if (marked)
     {
