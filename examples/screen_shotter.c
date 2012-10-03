@@ -95,93 +95,93 @@ int carve_shrinking_circle(struct drunkard *drunk, int min, int max, unsigned ti
     return 0;
 }
 
-void carve_seed(struct drunkard *w)
+void carve_seed(struct drunkard *drunk)
 {
-    drunkard_start_fixed(w, 40, 12);
-    drunkard_mark_1(w, STONE_FLOOR);
-    drunkard_flush_marks(w);
+    drunkard_start_fixed(drunk, 40, 12);
+    drunkard_mark_1(drunk, STONE_FLOOR);
+    drunkard_flush_marks(drunk);
 }
 
-void carve_room_and_corridor(struct drunkard *w)
+void carve_room_and_corridor(struct drunkard *drunk)
 {
-    drunkard_start_random(w);
-    drunkard_target_random_opened(w);
+    drunkard_start_random(drunk);
+    drunkard_target_random_opened(drunk);
 
     int marked;
 
-    if (drunkard_rng_chance(w, 0.5))
-        marked = carve_shrinking_square(w, 3, 8, STONE_FLOOR);
+    if (drunkard_rng_chance(drunk, 0.5))
+        marked = carve_shrinking_square(drunk, 3, 8, STONE_FLOOR);
     else
-        marked = carve_shrinking_circle(w, 3, 8, STONE_FLOOR);
+        marked = carve_shrinking_circle(drunk, 3, 8, STONE_FLOOR);
 
     if (marked)
     {
-        int x = drunkard_get_x(w);
-        int y = drunkard_get_y(w);
+        int x = drunkard_get_x(drunk);
+        int y = drunkard_get_y(drunk);
 
-        drunkard_tunnel_path_to_target(w);
-        while (drunkard_walk_path(w))
+        drunkard_tunnel_path_to_target(drunk);
+        while (drunkard_walk_path(drunk))
         {
-            if (drunkard_is_on_opened(w))
+            if (drunkard_is_on_opened(drunk))
                 break;
 
-            drunkard_mark_1(w, STONE_FLOOR);
+            drunkard_mark_1(drunk, STONE_FLOOR);
         }
 
-        drunkard_start_fixed(w, x, y);
+        drunkard_start_fixed(drunk, x, y);
 
-        if (map[drunkard_get_y(w)][drunkard_get_x(w) + marked + 1] == STONE_FLOOR)
+        if (map[drunkard_get_y(drunk)][drunkard_get_x(drunk) + marked + 1] == STONE_FLOOR)
         {
-            drunkard_mark(w, drunkard_get_x(w) + marked, drunkard_get_y(w), WOOD_DOOR);
+            drunkard_mark(drunk, drunkard_get_x(drunk) + marked, drunkard_get_y(drunk), WOOD_DOOR);
         }
-        if (map[drunkard_get_y(w)][drunkard_get_x(w) - marked - 1] == STONE_FLOOR)
+        if (map[drunkard_get_y(drunk)][drunkard_get_x(drunk) - marked - 1] == STONE_FLOOR)
         {
-            drunkard_mark(w, drunkard_get_x(w) - marked, drunkard_get_y(w), WOOD_DOOR);
+            drunkard_mark(drunk, drunkard_get_x(drunk) - marked, drunkard_get_y(drunk), WOOD_DOOR);
         }
-        if (map[drunkard_get_y(w) + marked + 1][drunkard_get_x(w)] == STONE_FLOOR)
+        if (map[drunkard_get_y(drunk) + marked + 1][drunkard_get_x(drunk)] == STONE_FLOOR)
         {
-            drunkard_mark(w, drunkard_get_x(w), drunkard_get_y(w) + marked, WOOD_DOOR);
+            drunkard_mark(drunk, drunkard_get_x(drunk), drunkard_get_y(drunk) + marked, WOOD_DOOR);
         }
-        if (map[drunkard_get_y(w) - marked - 1][drunkard_get_x(w)] == STONE_FLOOR)
+        if (map[drunkard_get_y(drunk) - marked - 1][drunkard_get_x(drunk)] == STONE_FLOOR)
         {
-            drunkard_mark(w, drunkard_get_x(w), drunkard_get_y(w) - marked, WOOD_DOOR);
+            drunkard_mark(drunk, drunkard_get_x(drunk), drunkard_get_y(drunk) - marked, WOOD_DOOR);
         }
 
-        if (drunkard_rng_chance(w, 0.3))
+        if (drunkard_rng_chance(drunk, 0.3))
         {
-            for (int x = drunkard_get_x(w) - abs(marked); x <= drunkard_get_x(w) + abs(marked); ++x)
+            for (int x = drunkard_get_x(drunk) - abs(marked); x <= drunkard_get_x(drunk) + abs(marked); ++x)
             {
-                for (int y = drunkard_get_y(w) - abs(marked); y <= drunkard_get_y(w) + abs(marked); ++y)
+                for (int y = drunkard_get_y(drunk) - abs(marked); y <= drunkard_get_y(drunk) + abs(marked); ++y)
                 {
                     if (x >= 0 && y >= 0 && x < WIDTH && y < HEIGHT)
                     {
                         if (map[y][x] == STONE_FLOOR)
                         {
-                            if (drunkard_rng_chance(w, 0.5))
-                                drunkard_mark(w, x, y, BLOODY_FLOOR);
+                            if (drunkard_rng_chance(drunk, 0.5))
+                                drunkard_mark(drunk, x, y, BLOODY_FLOOR);
                         }
                         else if (map[y][x] == STONE_WALL)
                         {
-                            if (drunkard_rng_chance(w, 0.5))
-                                drunkard_mark(w, x, y, BLOODY_WALL);
+                            if (drunkard_rng_chance(drunk, 0.5))
+                                drunkard_mark(drunk, x, y, BLOODY_WALL);
                         }
                     }
                 }
             }
         }
-        else if (drunkard_rng_chance(w, 0.2))
+        else if (drunkard_rng_chance(drunk, 0.2))
         {
-            for (int x = drunkard_get_x(w) - abs(marked); x <= drunkard_get_x(w) + abs(marked); ++x)
+            for (int x = drunkard_get_x(drunk) - abs(marked); x <= drunkard_get_x(drunk) + abs(marked); ++x)
             {
-                for (int y = drunkard_get_y(w) - abs(marked); y <= drunkard_get_y(w) + abs(marked); ++y)
+                for (int y = drunkard_get_y(drunk) - abs(marked); y <= drunkard_get_y(drunk) + abs(marked); ++y)
                 {
                     if (x >= 0 && y >= 0 && x < WIDTH && y < HEIGHT)
                     {
                         if (map[y][x] == STONE_FLOOR)
                         {
-                            if (drunkard_rng_chance(w, 0.1))
+                            if (drunkard_rng_chance(drunk, 0.1))
                             {
-                                drunkard_mark(w, x, y, WOOD_TABLE);
+                                drunkard_mark(drunk, x, y, WOOD_TABLE);
                                 goto end;
                             }
                         }
@@ -192,38 +192,38 @@ void carve_room_and_corridor(struct drunkard *w)
     }
 end:
 
-    drunkard_flush_marks(w);
+    drunkard_flush_marks(drunk);
 }
 
-void carve_randomly(struct drunkard *w)
+void carve_randomly(struct drunkard *drunk)
 {
-    drunkard_start_random(w);
-    drunkard_target_random_opened(w);
+    drunkard_start_random(drunk);
+    drunkard_target_random_opened(drunk);
 
     unsigned tile;
-    if (drunkard_rng_chance(w, 0.1))
+    if (drunkard_rng_chance(drunk, 0.1))
         tile = ALIEN_FLOOR;
     else
         tile = DIRT_FLOOR;
 
-    while (!drunkard_is_on_opened(w))
+    while (!drunkard_is_on_opened(drunk))
     {
-        drunkard_mark_plus(w, tile);
-        drunkard_step_to_target(w, 0.55);
+        drunkard_mark_plus(drunk, tile);
+        drunkard_step_to_target(drunk, 0.55);
     }
 
-    drunkard_flush_marks(w);
+    drunkard_flush_marks(drunk);
 }
 
-void carve(struct drunkard *w)
+void carve(struct drunkard *drunk)
 {
-    if (drunkard_rng_chance(w, 0.3))
-        carve_randomly(w);
+    if (drunkard_rng_chance(drunk, 0.3))
+        carve_randomly(drunk);
     else
-        carve_room_and_corridor(w);
+        carve_room_and_corridor(drunk);
 }
 
-void post_carve(struct drunkard *w)
+void post_carve(struct drunkard *drunk)
 {
     int neighbors[4][2] = {
         {-1,  0},
@@ -244,7 +244,7 @@ void post_carve(struct drunkard *w)
                     int ny = y + neighbors[i][1];
                     unsigned tile = map[ny][nx];
                     if (tile == STONE_WALL)
-                        drunkard_mark(w, nx, ny, DIRT_WALL);
+                        drunkard_mark(drunk, nx, ny, DIRT_WALL);
                 }
             }
             else if (map[y][x] == ALIEN_FLOOR)
@@ -255,40 +255,40 @@ void post_carve(struct drunkard *w)
                     int ny = y + neighbors[i][1];
                     unsigned tile = map[ny][nx];
                     if (tile == STONE_WALL)
-                        drunkard_mark(w, nx, ny, DIRT_WALL);
+                        drunkard_mark(drunk, nx, ny, DIRT_WALL);
                 }
             }
         }
     }
 
-    drunkard_start_random_edge(w);
-    drunkard_target_random_edge(w);
+    drunkard_start_random_edge(drunk);
+    drunkard_target_random_edge(drunk);
 
-    while (!drunkard_is_on_target(w))
+    while (!drunkard_is_on_target(drunk))
     {
-        drunkard_mark_plus(w, WATER_FLOWING);
-        drunkard_step_to_target(w, 0.8);
+        drunkard_mark_plus(drunk, WATER_FLOWING);
+        drunkard_step_to_target(drunk, 0.8);
     }
 
-    drunkard_flush_marks(w);
+    drunkard_flush_marks(drunk);
 }
 
-void generate_dungeon(struct drunkard *w)
+void generate_dungeon(struct drunkard *drunk)
 {
-    drunkard_mark_all(w, STONE_WALL);
-    drunkard_flush_marks(w);
+    drunkard_mark_all(drunk, STONE_WALL);
+    drunkard_flush_marks(drunk);
 
-    carve_seed(w);
+    carve_seed(drunk);
     int tries = HEIGHT * HEIGHT;
-    while (drunkard_percent_opened(w) < 0.55 && tries --> 0)
-        carve(w);
+    while (drunkard_percent_opened(drunk) < 0.55 && tries --> 0)
+        carve(drunk);
 
-    post_carve(w);
+    post_carve(drunk);
 }
 
-void generate_fov(struct drunkard *w, TCOD_map_t fov, bool explored[HEIGHT][WIDTH])
+void generate_fov(struct drunkard *drunk, TCOD_map_t fov, bool explored[HEIGHT][WIDTH])
 {
-    (void)w;
+    (void)drunk;
     for (unsigned x = 0; x < WIDTH; ++x)
     {
         for (unsigned y = 0; y < HEIGHT; ++y)
