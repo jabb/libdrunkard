@@ -54,6 +54,8 @@
 
 <h2>Using Drunkard</h2>
 
+<h3>A Brief Example</h3>
+
 <p>In order to use libdrunkard, all you need to do is include the header file <code>&lt;dunkard.h&gt;</code> and link against the library by passing <code>-ldrunkard</code> to GCC, or some other compiler. After that you need to have your map already defined and then you can create your drunk. The map needs to be an array or multidimensional array of unsigned numbers, if multidimensional, height must be indexed first, like below:</p>
 
 <pre><code>unsigned map[MAP_HEIGHT][MAP_WIDTH] = {{0}};
@@ -75,7 +77,107 @@ drunkard_destroy(drunk);
 <li>libdrunkard keeps a list of tiles that have been opened and tiles that might be opened after a flush, the latter are called marks. "Marking" tiles is the preferable way to set tiles during a carving process, that way any tiles that open up don't confuse the drunkard into thinking he's found the main tunnel system. There are various marking functions, but only one way to flush them: <code>drunkard_flush_marks</code>. Flush only when you're absolutely sure you've connected with the rest of your walkable area, or you know you can get back to the disconnected area.</li>
 <li>libdrunkard's marks tiles only relative to the current position and target of the drunk. When you're carving, at some point you should <strong>always</strong> target a random open tile and head towards it. There are always exceptions of course, but this is a good rule so you can be sure your drunk connects to a walkable area.</li>
 <li>libdrunkard's main stepping function uses a weight to calculate how stumbly the drunk will be. The weight is on a scale from 0.0 to 1.0. A value of 0.0 means the drunk will move directly away from his target, a value of 1.0 will mean directory towards, and a value of 0.5 means he'll just randomly walk around. I like values between 0.6 and 0.9 to be sure the drunk reaches his target.</li>
-</ul><h2>Function Documentation</h2>
+</ul><h3>A More Involved Example (examples/cave.c)</h3>
+
+<pre><code>#include &lt;stdio.h&gt;
+
+#include "drunkard.h"
+
+/* Our map's dimensions. */
+#define WIDTH   80
+#define HEIGHT  24
+
+/* By default, the drunk recognizes anything above 0 to be open space, ie
+ * walkable.
+ */
+enum {WALL, FLOOR};
+
+/* This function simply outputs our map to the console. */
+void output_map(unsigned map[HEIGHT][WIDTH]);
+
+int main(void)
+{
+    /* Create our map. Making sure the default value is our WALL. It is
+     * important to note that the drunk indexes in a way that the height needs
+     * to be specified first.
+     */
+    unsigned map[HEIGHT][WIDTH] = {{WALL}};
+
+    /* Now we need to create our poor drunk to wonder the map. */
+    struct drunkard *drunk = drunkard_create((void *)map, WIDTH, HEIGHT);
+
+    /* A lot of the drunk's navigating is done by knowing where places he can
+     * walk are. If there are no places he can walk, he'll just walk aimlessly
+     * and may never connect to the rest of the map if there is one. We can't
+     * allow that.
+     *
+     * Here we carve a "seed". This seed is a walkable tile that a drunk can
+     * walk to.
+     */
+    /* First he'll start on a random place on the map. */
+    drunkard_start_random(drunk);
+    /* Then he marks the spot he's on at a "FLOOR", which the drunk knows is
+     * walkable.
+     */
+    drunkard_mark_1(drunk, FLOOR);
+    /* Now we have to "flush" the changes. I'll talk more about what flushing
+     * does later.
+     */
+    drunkard_flush_marks(drunk);
+
+    /* Now we have our seed, we can start carving does cool maps. We're going
+     * to carve a VERY simple cave. The drunk will only carve once.
+     */
+     /* Start in a random location. */
+    drunkard_start_random(drunk);
+     /* Here's where we use our drunk's knowledge to target a place he knows
+      * he can walk. This will target our seed, since it's the only open tile.
+      */
+    drunkard_target_random_opened(drunk);
+
+     /* Here's the tricky part. We're going to walk towards our target until we
+      * reach it or until we come across another open tile (hardly!).
+      */
+    while (!drunkard_is_on_target(drunk) || !drunkard_is_on_opened(drunk))
+    {
+        /* Mark a plus symbol of FLOORs. The plus is a cool way to carve through
+         * a map. It doesn't ever leave tight diagonals to maneuver around, and
+         * it's quite spacious!
+         */
+        drunkard_mark_plus(drunk, FLOOR);
+        /* We can step to the target in a variety of ways and with different
+         * weights. The weight value goes from 0 to 1. 0 basically means the
+         * drunk will be moving AWAY from his target. 1 will cause the drunk
+         * to go straight towards his target. And 0.5 he'll wander aimlessly,
+         * and may never reach his target. I like a value from 0.6 to 0.9. We'll
+         * use 0.6 for drunk that wanders a lot.
+         */
+        drunkard_step_to_target(drunk, 0.6);
+    }
+
+    /* Finally, let's output our map! */
+    output_map(map);
+
+    /* Always destroy the drunk when you're done with him! */
+    drunkard_destroy(drunk);
+
+    return 0;
+}
+
+void output_map(unsigned map[HEIGHT][WIDTH])
+{
+    for (int y = 0; y &lt; HEIGHT; ++y)
+    {
+        for (int x = 0; x &lt; WIDTH; ++x)
+        {
+            printf("%c", map[y][x] ? '.' : '#');
+        }
+        printf("\n");
+    }
+}
+</code></pre>
+
+<h2>Function Documentation</h2>
 
 <h3>Drunk Creation/Destruction</h3>
 
