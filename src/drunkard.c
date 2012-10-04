@@ -603,10 +603,10 @@ void drunkard_mark_plus(struct drunkard *drunk, unsigned tile)
 void drunkard_mark_x(struct drunkard *drunk, unsigned tile)
 {
     drunkard_mark(drunk, drunk->x, drunk->y, tile);
-    drunkard_mark(drunk, drunk->x - 1, drunk->y, tile - 1);
-    drunkard_mark(drunk, drunk->x - 1, drunk->y, tile + 1);
-    drunkard_mark(drunk, drunk->x + 1, drunk->y, tile - 1);
-    drunkard_mark(drunk, drunk->x + 1, drunk->y, tile + 1);
+    drunkard_mark(drunk, drunk->x - 1, drunk->y - 1, tile);
+    drunkard_mark(drunk, drunk->x - 1, drunk->y + 1, tile);
+    drunkard_mark(drunk, drunk->x + 1, drunk->y - 1, tile);
+    drunkard_mark(drunk, drunk->x + 1, drunk->y + 1, tile);
 }
 
 void drunkard_mark_rect(struct drunkard *drunk, int hw, int hh, unsigned tile)
