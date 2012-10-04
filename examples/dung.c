@@ -36,9 +36,8 @@ int main(void)
      */
     /* First he'll start on a random place on the map. */
     drunkard_start_random(drunk);
-    /* Then he marks the spot he's on at a "FLOOR", which the drunk knows is
-     * walkable. Let's mark a room. The 3's are half widths and half heights, so
-     * the room will be 7x7.
+    /* Lets mark a room. The 3's are half widths and half heights, so the room
+     * will be 7x7.
      */
     drunkard_mark_rect(drunk, 3, 3, FLOOR);
     /* Now we have to "flush" the changes. I'll talk more about what flushing
