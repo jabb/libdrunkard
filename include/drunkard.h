@@ -47,6 +47,9 @@ bool drunkard_is_opened(struct drunkard *drunk, int x, int y);
 void drunkard_set_open_threshold(struct drunkard *drunk, unsigned threshold);
 void drunkard_mark(struct drunkard *drunk, int x, int y, unsigned tile);
 void drunkard_flush_marks(struct drunkard *drunk);
+void drunkard_push_state(struct drunkard *drunk);
+void drunkard_pop_state(struct drunkard *drunk);
+bool drunkard_is_stack_full(struct drunkard *drunk);
 
 /* Query the drunkard. */
 

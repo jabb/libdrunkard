@@ -230,6 +230,8 @@ void pointset_clear(struct pointset *ps)
 Drunkard.
 \******************************************************************************/
 
+#define STACK_SIZE 256
+
 #define TILE_AT(w, x, y) (INDEX2((w)->tiles, x, y, (w)->width))
 #define IN_BOUNDS(w, x, y) \
     ((x) >= 0 && (y) >= 0 && (x) < (int)(w)->width && (y) < (int)(w)->height)
@@ -245,6 +247,11 @@ struct drunkard
     unsigned width, height;
     unsigned open_threshold;
 
+    int stack_top;
+    int x_stack[STACK_SIZE];
+    int y_stack[STACK_SIZE];
+    int target_x_stack[STACK_SIZE];
+    int target_y_stack[STACK_SIZE];
     int x, y;
     int target_x, target_y;
 
@@ -272,6 +279,7 @@ struct drunkard *drunkard_create(unsigned *tiles, unsigned w, unsigned h)
     drunk->height = h;
     drunk->open_threshold = 1;
 
+    drunk->stack_top = -1;
     drunk->x = -1;
     drunk->y = -1;
     drunk->target_x = -1;
@@ -332,6 +340,29 @@ void drunkard_flush_marks(struct drunkard *drunk)
         pointset_add(&drunk->openedset, *pi);
 
     pointset_clear(&drunk->markedset);
+}
+
+void drunkard_push_state(struct drunkard *drunk)
+{
+    drunk->stack_top++;
+    drunk->x_stack[drunk->stack_top] = drunk->x;
+    drunk->y_stack[drunk->stack_top] = drunk->y;
+    drunk->target_x_stack[drunk->stack_top] = drunk->target_x;
+    drunk->target_y_stack[drunk->stack_top] = drunk->target_y;
+}
+
+void drunkard_pop_state(struct drunkard *drunk)
+{
+    drunk->x = drunk->x_stack[drunk->stack_top];
+    drunk->y = drunk->y_stack[drunk->stack_top];
+    drunk->target_x = drunk->target_x_stack[drunk->stack_top];
+    drunk->target_y = drunk->target_y_stack[drunk->stack_top];
+    drunk->stack_top--;
+}
+
+bool drunkard_is_stack_full(struct drunkard *drunk)
+{
+    return drunk->stack_top + 1 >= STACK_SIZE;
 }
 
 unsigned drunkard_count_opened(struct drunkard *drunk)
@@ -620,7 +651,7 @@ void drunkard_mark_circle(struct drunkard *drunk, int r, unsigned tile)
 {
     for (int dx = -r; dx <= r; ++dx)
     {
-        int h = floor(sqrt(r * r - dx * dx) - 0.0000001);
+        int h = floor(sqrt(r * r - dx * dx));
         for (int dy = -h; dy <= h; ++dy)
         {
             int x = drunkard_get_x(drunk) + dx;
@@ -897,7 +928,7 @@ bool drunkard_is_opened_on_circle(struct drunkard *drunk, unsigned r)
 {
     for (int dx = -(int)r; dx <= (int)r; ++dx)
     {
-        int h = floor(sqrt(r * r - dx * dx) - 0.00000001);
+        int h = floor(sqrt(r * r - dx * dx));
         for (int dy = -h; dy <= h; ++dy)
         {
             int x = drunkard_get_x(drunk) + dx;

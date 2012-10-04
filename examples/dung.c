@@ -27,9 +27,9 @@ int main(void)
     struct drunkard *drunk = drunkard_create((void *)map, WIDTH, HEIGHT);
 
     /* A lot of the drunk's navigating is done by knowing where places he can
-     * walk are. If there are no places he can walk, he'll just walk aimlessly
-     * and may never connect to the rest of the map if there is one. We can't
-     * allow that.
+     * walk are. If there are no places he can walk to, he'll just walk
+     * aimlessly and may never connect to an already carved tile, leaving some
+     * tiles unreachable. We can't allow that.
      *
      * Here we carve a "seed". This seed is a walkable tile that a drunk can
      * walk to.
