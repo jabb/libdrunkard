@@ -45,8 +45,8 @@ int main(void)
      */
     drunkard_flush_marks(drunk);
 
-    /* Now we have our seed, we can start carving does cool maps. We're going
-     * to carve a VERY simple cave. The drunk will only carve once.
+    /* Now we have our seed, we can start carving some cool maps. We're going
+     * to carve a VERY simple cave (the drunk will only carve once).
      */
      /* Start in a random location. */
     drunkard_start_random(drunk);
@@ -75,6 +75,17 @@ int main(void)
         drunkard_step_to_target(drunk, 0.6);
     }
 
+    /* We don't need to flush our changes because we're not going to carve
+     * anymore, but it's good practice to do anyway.
+     *
+     * Until we flush, the drunk still doesn't see what the changes we made
+     * since the last flush. Which is good, if he saw them, and backtracked
+     * by walking randomly, he'd think he'd found an open place. We only flush
+     * when we know we reached an opened tile that the drunk didn't carve this
+     * iteration.
+     */
+    drunkard_flush_marks(drunk);
+
     /* Finally, let's output our map! */
     output_map(map);
 
@@ -86,12 +97,9 @@ int main(void)
 
 void output_map(unsigned map[HEIGHT][WIDTH])
 {
-    int x;
-    int y;
-
-    for (y = 0; y < HEIGHT; ++y)
+    for (int y = 0; y < HEIGHT; ++y)
     {
-        for (x = 0; x < WIDTH; ++x)
+        for (int x = 0; x < WIDTH; ++x)
         {
             printf("%c", map[y][x] ? '.' : '#');
         }

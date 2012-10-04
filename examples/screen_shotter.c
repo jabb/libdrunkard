@@ -62,14 +62,14 @@ void draw_tile(int x, int y, unsigned tile, bool vis)
 
 int carve_shrinking_square(struct drunkard *drunk, int min, int max, unsigned tile)
 {
-    bool marked;
+    bool has_opened;
 
     do {
-        marked = drunkard_is_opened_on_rect(drunk, max, max);
+        has_opened = drunkard_is_opened_on_rect(drunk, max + 1, max + 1);
         max--;
-    } while (marked && max >= min);
+    } while (has_opened && max >= min);
 
-    if (!marked)
+    if (!has_opened)
     {
         drunkard_mark_rect(drunk, max + 1, max + 1, tile);
         return max + 1;
@@ -79,17 +79,17 @@ int carve_shrinking_square(struct drunkard *drunk, int min, int max, unsigned ti
 
 int carve_shrinking_circle(struct drunkard *drunk, int min, int max, unsigned tile)
 {
-    bool marked;
+    bool has_opened;
 
     do {
-        marked = drunkard_is_opened_on_circle(drunk, max);
+        has_opened = drunkard_is_opened_on_circle(drunk, max + 1);
         max--;
-    } while (marked && max >= min);
+    } while (has_opened && max >= min);
 
-    if (!marked)
+    if (!has_opened)
     {
         drunkard_mark_circle(drunk, max + 1, tile);
-        /* + 1 for the max--; in the loop */
+        /* +1 for the max--; in the loop */
         return max + 1;
     }
     return 0;
@@ -116,8 +116,7 @@ void carve_room_and_corridor(struct drunkard *drunk)
 
     if (marked)
     {
-        int x = drunkard_get_x(drunk);
-        int y = drunkard_get_y(drunk);
+        bool made_door = false;
 
         drunkard_tunnel_path_to_target(drunk);
         while (drunkard_walk_path(drunk))
@@ -125,26 +124,15 @@ void carve_room_and_corridor(struct drunkard *drunk)
             if (drunkard_is_on_opened(drunk))
                 break;
 
-            drunkard_mark_1(drunk, STONE_FLOOR);
-        }
-
-        drunkard_start_fixed(drunk, x, y);
-
-        if (map[drunkard_get_y(drunk)][drunkard_get_x(drunk) + marked + 1] == STONE_FLOOR)
-        {
-            drunkard_mark(drunk, drunkard_get_x(drunk) + marked, drunkard_get_y(drunk), WOOD_DOOR);
-        }
-        if (map[drunkard_get_y(drunk)][drunkard_get_x(drunk) - marked - 1] == STONE_FLOOR)
-        {
-            drunkard_mark(drunk, drunkard_get_x(drunk) - marked, drunkard_get_y(drunk), WOOD_DOOR);
-        }
-        if (map[drunkard_get_y(drunk) + marked + 1][drunkard_get_x(drunk)] == STONE_FLOOR)
-        {
-            drunkard_mark(drunk, drunkard_get_x(drunk), drunkard_get_y(drunk) + marked, WOOD_DOOR);
-        }
-        if (map[drunkard_get_y(drunk) - marked - 1][drunkard_get_x(drunk)] == STONE_FLOOR)
-        {
-            drunkard_mark(drunk, drunkard_get_x(drunk), drunkard_get_y(drunk) - marked, WOOD_DOOR);
+            if (!made_door && map[drunkard_get_y(drunk)][drunkard_get_x(drunk)] < STONE_FLOOR)
+            {
+                made_door = true;
+                drunkard_mark_1(drunk, WOOD_DOOR);
+            }
+            else
+            {
+                drunkard_mark_1(drunk, STONE_FLOOR);
+            }
         }
 
         if (drunkard_rng_chance(drunk, 0.3))
@@ -300,11 +288,16 @@ void generate_fov(struct drunkard *drunk, TCOD_map_t fov, bool explored[HEIGHT][
     }
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
     struct drunkard *drunk = drunkard_create((void *)map, WIDTH, HEIGHT);
     drunkard_set_open_threshold(drunk, STONE_FLOOR);
-    unsigned s = time(NULL);
+
+    unsigned s;
+    if (argc == 2)
+        s = atoi(argv[1]);
+    else
+        s = time(NULL);
     printf("seed: %u\n", s);
     drunkard_seed(drunk, s);
 

@@ -620,7 +620,7 @@ void drunkard_mark_circle(struct drunkard *drunk, int r, unsigned tile)
 {
     for (int dx = -r; dx <= r; ++dx)
     {
-        int h = floor(sqrt(r * r - dx * dx));
+        int h = floor(sqrt(r * r - dx * dx) - 0.0000001);
         for (int dy = -h; dy <= h; ++dy)
         {
             int x = drunkard_get_x(drunk) + dx;
@@ -897,7 +897,7 @@ bool drunkard_is_opened_on_circle(struct drunkard *drunk, unsigned r)
 {
     for (int dx = -(int)r; dx <= (int)r; ++dx)
     {
-        int h = floor(sqrt(r * r - dx * dx));
+        int h = floor(sqrt(r * r - dx * dx) - 0.00000001);
         for (int dy = -h; dy <= h; ++dy)
         {
             int x = drunkard_get_x(drunk) + dx;

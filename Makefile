@@ -13,10 +13,11 @@ libdrunkard.a: $(OBJS)
 	ranlib lib/libdrunkard.a
 
 examples: libdrunkard.a
-	$(CC) $(CFLAGS) examples/cave.c $(LDFLAGS) -L./lib -ldrunkard -o examples/cave
-	$(CC) $(CFLAGS) examples/dung.c $(LDFLAGS) -L./lib -ldrunkard -o examples/dung
-	$(CC) $(CFLAGS) examples/atw.c $(LDFLAGS) -L./lib -ldrunkard -o examples/atw
-	$(CC) $(CFLAGS) examples/screen_shotter.c $(LDFLAGS) -L./lib -ldrunkard -ltcod -o examples/screen_shotter
+	@$(CC) $(CFLAGS) examples/cave.c $(LDFLAGS) -L./lib -ldrunkard -o examples/cave
+	@$(CC) $(CFLAGS) examples/dung.c $(LDFLAGS) -L./lib -ldrunkard -o examples/dung
+	@$(CC) $(CFLAGS) examples/atw.c $(LDFLAGS) -L./lib -ldrunkard -o examples/atw
+	@test -e /usr/lib/libtcod.so && \
+		$(CC) $(CFLAGS) examples/screen_shotter.c $(LDFLAGS) -L./lib -ldrunkard -ltcod -o examples/screen_shotter
 
 install:
 	mv include/drunkard.h /usr/include
