@@ -58,7 +58,7 @@ int main(void)
      /* Here's the tricky part. We're going to walk towards our target until we
       * reach it or until we come across another open tile (hardly!).
       */
-    while (!drunkard_is_on_target(drunk) || !drunkard_is_on_opened(drunk))
+    while (!drunkard_is_on_target(drunk) && !drunkard_is_on_opened(drunk))
     {
         /* Mark a plus symbol of FLOORs. The plus is a cool way to carve through
          * a map. It doesn't ever leave tight diagonals to maneuver around, and

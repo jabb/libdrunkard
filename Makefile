@@ -17,6 +17,7 @@ libdrunkard.a: $(OBJS)
 examples: libdrunkard.a
 	-@echo -n 'Building examples...'
 	-@$(CC) $(CFLAGS) examples/cave.c $(LDFLAGS) -L./lib -ldrunkard -o examples/cave 2> /dev/null
+	-@$(CC) $(CFLAGS) examples/cave2.c $(LDFLAGS) -L./lib -ldrunkard -o examples/cave2 2> /dev/null
 	-@$(CC) $(CFLAGS) examples/dung.c $(LDFLAGS) -L./lib -ldrunkard -o examples/dung 2> /dev/null
 	-@$(CC) $(CFLAGS) examples/atw.c $(LDFLAGS) -L./lib -ldrunkard -o examples/atw 2> /dev/null
 	-@$(CC) $(CFLAGS) examples/screen_shotter.c $(LDFLAGS) -L./lib -ldrunkard -ltcod -o examples/screen_shotter 2> /dev/null

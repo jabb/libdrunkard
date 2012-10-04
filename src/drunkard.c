@@ -238,20 +238,15 @@ Drunkard.
 
 struct drunkard
 {
-    struct pointset openedset;
-    struct pointset markedset;
-    struct rng_state rng;
+    struct pointset *openedset;
+    struct pointset *markedset;
+    struct rng_state *rng;
     unsigned seed;
 
     unsigned *tiles;
     unsigned width, height;
     unsigned open_threshold;
 
-    int stack_top;
-    int x_stack[STACK_SIZE];
-    int y_stack[STACK_SIZE];
-    int target_x_stack[STACK_SIZE];
-    int target_y_stack[STACK_SIZE];
     int x, y;
     int target_x, target_y;
 
@@ -265,21 +260,34 @@ struct drunkard *drunkard_create(unsigned *tiles, unsigned w, unsigned h)
     if (!drunk)
         goto alloc_failure;
 
-    if (!pointset_init(&drunk->markedset, w, h))
+    memset(drunk, 0, sizeof *drunk);
+
+    drunk->markedset = malloc(sizeof *drunk->markedset);
+    if (!drunk->markedset)
+        goto alloc_failure;
+
+    drunk->openedset = malloc(sizeof *drunk->openedset);
+    if (!drunk->openedset)
+        goto alloc_failure;
+
+    drunk->rng = malloc(sizeof *drunk->rng);
+    if (!drunk->rng)
+        goto alloc_failure;
+
+    if (!pointset_init(drunk->markedset, w, h))
         goto markedset_init_failure;
 
-    if (!pointset_init(&drunk->openedset, w, h))
+    if (!pointset_init(drunk->openedset, w, h))
         goto openedset_init_failure;
 
     drunk->seed = time(NULL);
-    rng_seed(&drunk->rng, drunk->seed);
+    rng_seed(drunk->rng, drunk->seed);
 
     drunk->tiles = tiles;
     drunk->width = w;
     drunk->height = h;
     drunk->open_threshold = 1;
 
-    drunk->stack_top = -1;
     drunk->x = -1;
     drunk->y = -1;
     drunk->target_x = -1;
@@ -290,23 +298,36 @@ struct drunkard *drunkard_create(unsigned *tiles, unsigned w, unsigned h)
     return drunk;
 
 openedset_init_failure:
-    pointset_uninit(&drunk->markedset);
+    pointset_uninit(drunk->markedset);
 markedset_init_failure:
-    free(drunk);
 alloc_failure:
+    if (drunk->rng)
+        free(drunk->rng);
+    if (drunk->openedset)
+        free(drunk->openedset);
+    if (drunk->markedset)
+        free(drunk->markedset);
+    if (drunk)
+        free(drunk);
     return NULL;
 }
 
 void drunkard_destroy(struct drunkard *drunk)
 {
-    pointset_uninit(&drunk->markedset);
-    pointset_uninit(&drunk->openedset);
+    pointset_uninit(drunk->markedset);
+    pointset_uninit(drunk->openedset);
+    if (drunk->rng)
+        free(drunk->rng);
+    if (drunk->openedset)
+        free(drunk->openedset);
+    if (drunk->markedset)
+        free(drunk->markedset);
     free(drunk);
 }
 
 bool drunkard_is_opened(struct drunkard *drunk, int x, int y)
 {
-    return pointset_has(&drunk->openedset, make_point(x, y));
+    return pointset_has(drunk->openedset, make_point(x, y));
 }
 
 void drunkard_set_open_threshold(struct drunkard *drunk, unsigned threshold)
@@ -320,12 +341,12 @@ void drunkard_mark(struct drunkard *drunk, int x, int y, unsigned tile)
     {
         if (tile >= drunk->open_threshold)
         {
-            pointset_add(&drunk->markedset, make_point(x, y));
+            pointset_add(drunk->markedset, make_point(x, y));
         }
         else
         {
-            pointset_rem(&drunk->markedset, make_point(x, y));
-            pointset_rem(&drunk->openedset, make_point(x, y));
+            pointset_rem(drunk->markedset, make_point(x, y));
+            pointset_rem(drunk->openedset, make_point(x, y));
         }
         TILE_AT(drunk, x, y) = tile;
     }
@@ -336,38 +357,36 @@ void drunkard_flush_marks(struct drunkard *drunk)
     unsigned i;
     struct point *pi;
 
-    POINTSET_FOR(&drunk->markedset, i, pi)
-        pointset_add(&drunk->openedset, *pi);
+    POINTSET_FOR(drunk->markedset, i, pi)
+        pointset_add(drunk->openedset, *pi);
 
-    pointset_clear(&drunk->markedset);
+    pointset_clear(drunk->markedset);
 }
 
-void drunkard_push_state(struct drunkard *drunk)
+struct drunkard *drunkard_clone(struct drunkard *drunk)
 {
-    drunk->stack_top++;
-    drunk->x_stack[drunk->stack_top] = drunk->x;
-    drunk->y_stack[drunk->stack_top] = drunk->y;
-    drunk->target_x_stack[drunk->stack_top] = drunk->target_x;
-    drunk->target_y_stack[drunk->stack_top] = drunk->target_y;
+    struct drunkard *clone = malloc(sizeof *clone);
+    if (!clone)
+        goto alloc_failure;
+
+    memcpy(clone, drunk, sizeof *clone);
+
+    return clone;
+
+alloc_failure:
+    if (clone)
+        free(clone);
+    return NULL;
 }
 
-void drunkard_pop_state(struct drunkard *drunk)
+void drunkard_destroy_clone(struct drunkard *clone)
 {
-    drunk->x = drunk->x_stack[drunk->stack_top];
-    drunk->y = drunk->y_stack[drunk->stack_top];
-    drunk->target_x = drunk->target_x_stack[drunk->stack_top];
-    drunk->target_y = drunk->target_y_stack[drunk->stack_top];
-    drunk->stack_top--;
-}
-
-bool drunkard_is_stack_full(struct drunkard *drunk)
-{
-    return drunk->stack_top + 1 >= STACK_SIZE;
+    free(clone);
 }
 
 unsigned drunkard_count_opened(struct drunkard *drunk)
 {
-    return drunk->openedset.length;
+    return drunk->openedset->length;
 }
 
 double drunkard_percent_opened(struct drunkard *drunk)
@@ -378,7 +397,7 @@ double drunkard_percent_opened(struct drunkard *drunk)
 
 void drunkard_random_opened(struct drunkard *drunk, unsigned *x, unsigned *y)
 {
-    struct point p = pointset_random(&drunk->openedset, &drunk->rng);
+    struct point p = pointset_random(drunk->openedset, drunk->rng);
     *x = p.x;
     *y = p.y;
 }
@@ -421,27 +440,27 @@ unsigned drunkard_get_seed(struct drunkard *drunk)
 void drunkard_seed(struct drunkard *drunk, unsigned s)
 {
     drunk->seed = s;
-    rng_seed(&drunk->rng, s);
+    rng_seed(drunk->rng, s);
 }
 
 double drunkard_rng_uniform(struct drunkard *drunk)
 {
-    return rng_uniform(&drunk->rng);
+    return rng_uniform(drunk->rng);
 }
 
 double drunkard_rng_under(struct drunkard *drunk, unsigned limit)
 {
-    return rng_under(&drunk->rng, limit);
+    return rng_under(drunk->rng, limit);
 }
 
 int drunkard_rng_range(struct drunkard *drunk, int low, int high)
 {
-    return rng_range(&drunk->rng, low, high);
+    return rng_range(drunk->rng, low, high);
 }
 
 bool drunkard_rng_chance(struct drunkard *drunk, double d)
 {
-    if (rng_uniform(&drunk->rng) < d)
+    if (rng_uniform(drunk->rng) < d)
         return true;
     return false;
 }
@@ -536,7 +555,7 @@ void drunkard_start_random_edge(struct drunkard *drunk)
 
 void drunkard_start_random_opened(struct drunkard *drunk)
 {
-    struct point p = pointset_random(&drunk->openedset, &drunk->rng);
+    struct point p = pointset_random(drunk->openedset, drunk->rng);
     drunk->x = p.x;
     drunk->y = p.y;
 }
@@ -601,7 +620,7 @@ void drunkard_target_random_edge(struct drunkard *drunk)
 
 void drunkard_target_random_opened(struct drunkard *drunk)
 {
-    struct point p = pointset_random(&drunk->openedset, &drunk->rng);
+    struct point p = pointset_random(drunk->openedset, drunk->rng);
     drunk->target_x = p.x;
     drunk->target_y = p.y;
 }
