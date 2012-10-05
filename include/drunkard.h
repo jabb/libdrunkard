@@ -44,6 +44,7 @@ void drunkard_destroy(struct drunkard *drunk);
 /* Core functions. */
 
 bool drunkard_is_opened(struct drunkard *drunk, int x, int y);
+bool drunkard_is_marked(struct drunkard *drunk, int x, int y);
 void drunkard_set_open_threshold(struct drunkard *drunk, unsigned threshold);
 void drunkard_mark(struct drunkard *drunk, int x, int y, unsigned tile);
 void drunkard_flush_marks(struct drunkard *drunk);
@@ -98,6 +99,11 @@ Targetting Functions.
 
 void drunkard_target_fixed(struct drunkard *drunk, int x, int y);
 
+void drunkard_target_random(struct drunkard *drunk);
+void drunkard_target_random_west(struct drunkard *drunk);
+void drunkard_target_random_east(struct drunkard *drunk);
+void drunkard_target_random_north(struct drunkard *drunk);
+void drunkard_target_random_south(struct drunkard *drunk);
 void drunkard_target_random_west_edge(struct drunkard *drunk);
 void drunkard_target_random_east_edge(struct drunkard *drunk);
 void drunkard_target_random_north_edge(struct drunkard *drunk);
@@ -136,6 +142,7 @@ Checking functions.
 \******************************************************************************/
 
 bool drunkard_is_on_opened(struct drunkard *drunk);
+bool drunkard_is_on_marked(struct drunkard *drunk);
 bool drunkard_is_opened_on_rect(struct drunkard *drunk, unsigned hw, unsigned hh);
 bool drunkard_is_opened_on_circle(struct drunkard *drunk, unsigned r);
 bool drunkard_is_on_target(struct drunkard *drunk);

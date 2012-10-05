@@ -330,6 +330,11 @@ bool drunkard_is_opened(struct drunkard *drunk, int x, int y)
     return pointset_has(drunk->openedset, make_point(x, y));
 }
 
+bool drunkard_is_marked(struct drunkard *drunk, int x, int y)
+{
+    return pointset_has(drunk->markedset, make_point(x, y));
+}
+
 void drunkard_set_open_threshold(struct drunkard *drunk, unsigned threshold)
 {
     drunk->open_threshold = threshold;
@@ -564,6 +569,36 @@ void drunkard_start_random_opened(struct drunkard *drunk)
 Targetting Functions.
 \******************************************************************************/
 
+void drunkard_target_random(struct drunkard *drunk)
+{
+    drunk->target_x = drunkard_rng_range(drunk, 0, drunk->width - 1);
+    drunk->target_y = drunkard_rng_range(drunk, 0, drunk->height - 1);
+}
+
+void drunkard_target_random_west(struct drunkard *drunk)
+{
+    drunk->target_x = drunkard_rng_range(drunk, 0, drunk->width / 2);
+    drunk->target_y = drunkard_rng_range(drunk, 0, drunk->height - 1);
+}
+
+void drunkard_target_random_east(struct drunkard *drunk)
+{
+    drunk->target_x = drunkard_rng_range(drunk, drunk->width / 2, drunk->width - 1);
+    drunk->target_y = drunkard_rng_range(drunk, 0, drunk->height - 1);
+}
+
+void drunkard_target_random_north(struct drunkard *drunk)
+{
+    drunk->target_x = drunkard_rng_range(drunk, 0, drunk->width - 1);
+    drunk->target_y = drunkard_rng_range(drunk, 0, drunk->height / 2);
+}
+
+void drunkard_target_random_south(struct drunkard *drunk)
+{
+    drunk->target_x = drunkard_rng_range(drunk, 0, drunk->width - 1);
+    drunk->target_y = drunkard_rng_range(drunk, drunk->height / 2, drunk->height - 1);
+}
+
 void drunkard_target_fixed(struct drunkard *drunk, int x, int y)
 {
     drunk->target_x = x;
@@ -711,10 +746,81 @@ void drunkard_step_random(struct drunkard *drunk)
     drunkard_step_by(drunk, dx, dy);
 }
 
+/* Okay, so here's the weighted walk algorith. Very sloppy, but I foresee it
+ * changing a lot so I'm not too worried. The algorithm is hard coded and
+ * not optimized... for now.
+ *
+ * The two cases you have in a four directional weighted walk is where the
+ * walker is ON an axis that the target is on as well. Each case is handled
+ * different.
+ *
+ * === On a same axis ===
+ *
+ * With this weighted walk I desire a spread of 25% for each direction when
+ * weight = 50%. That's right in the middle. In the same axis case there is only
+ * one direction that heads directly to the target, so in order to give it the
+ * proper weight, it's chance of occuring is weight / 2, so at weight = 50%, the
+ * exact chance to go directly towards the target is 25%. What do we do with
+ * the remainding percent and the other three directions? Well the remaining
+ * weight is divided evenly, so each of the three directions gets a 3rd of it
+ * or a (6th of the total since the direct direction took half already). They
+ * also get the left over anti-weight (1 - weight), which is divided evenly so
+ * they get a 3rd of it.
+ *
+ * (X is target, @ is location, W is weight):
+ *                  (W / 6 + (1 - W) / 3)
+ *                          |
+ *                          |
+ * (W / 6 + (1 - W) / 3) ---@--- X (W / 2)
+ *                          |
+ *                          |
+ *                  (W / 6 + (1 - W) / 3)
+ *
+ * For example, when W = 0.75:
+ *         ~20.83%
+ *            |
+ *            |
+ * ~20.83% ---@--- X 37.5%
+ *            |
+ *            |
+ *         ~20.83%
+ *
+ * When W = 1.0:
+ *         ~16.66%
+ *            |
+ *            |
+ * ~16.66% ---@--- X 50%
+ *            |
+ *            |
+ *         ~16.66%
+ *
+ * === Not on a same axis ===
+ *
+ * The same axis is easier, the formula is:
+ *
+ * (X is target, @ is location, W is weight):
+ *             (W / 2)
+ *                |
+ *                |  X
+ * (1 - W) / 2 ---@--- (W / 2)
+ *                |
+ *                |
+ *           (1 - W) / 2
+ *
+ * For example, when W = 0.75:
+ *        37.5%
+ *          |
+ *          |  X
+ * 12.5% ---@--- 37.5%
+ *          |
+ *          |
+ *        12.5%
+ */
+
 void drunkard_step_to_target(struct drunkard *drunk, double weight)
 {
-    int dx = drunk->target_x - drunk->x;
-    int dy = drunk->target_y - drunk->y;
+    int dx = drunkard_get_dx_to_target(drunk);
+    int dy = drunkard_get_dy_to_target(drunk);
 
     if (dx >  1) dx = 1;
     if (dx < -1) dx = -1;
@@ -725,7 +831,7 @@ void drunkard_step_to_target(struct drunkard *drunk, double weight)
 
     if (dx == 0 && dy == 0)
     {
-
+        /* On target, do nothing. */
     }
     else if (dx == 0 || dy == 0)
     {
@@ -741,42 +847,46 @@ void drunkard_step_to_target(struct drunkard *drunk, double weight)
             dpnz = &dx;
         }
 
-        if (r < 0.5)
+        if (r >= (weight * 0.5))
         {
-            if (r < 0.25)
+            r -= weight * 0.5;
+            if (r < weight * (1.0 / 6) + (1 - weight) * (1.0 / 3))
             {
                 *dpz = -1;
                 *dpnz = 0;
             }
-            else
+            else if (r < weight * (2.0 / 6) + (1 - weight) * (2.0 / 3))
             {
                 *dpz = 1;
                 *dpnz = 0;
             }
-        }
-        else if (r < 0.5 + (weight / 2))
-        {
-        }
-        else
-        {
-            if (dx != 0)
-                dx *= -1;
-            if (dy != 0)
-                dy *= -1;
+            else
+            {
+                *dpz = 0;
+                *dpnz *= -1;
+            }
         }
     }
     else
     {
-        if (r < (1 - weight))
+        if (r < weight * 0.5)
+        {
+            dy = 0;
+        }
+        else if (r < weight)
+        {
+            dx = 0;
+        }
+        else if (r < weight + (1 - weight) * 0.5)
         {
             dx *= -1;
+            dy = 0;
+        }
+        else
+        {
+            dx = 0;
             dy *= -1;
         }
-
-        if (drunkard_rng_chance(drunk, 0.5))
-            dx = 0;
-        else
-            dy = 0;
     }
 
     drunkard_step_by(drunk, dx, dy);
@@ -932,6 +1042,11 @@ Checking functions.
 bool drunkard_is_on_opened(struct drunkard *drunk)
 {
     return drunkard_is_opened(drunk, drunk->x, drunk->y);
+}
+
+bool drunkard_is_on_marked(struct drunkard *drunk)
+{
+    return drunkard_is_marked(drunk, drunk->x, drunk->y);
 }
 
 bool drunkard_is_opened_on_rect(struct drunkard *drunk, unsigned hw, unsigned hh)

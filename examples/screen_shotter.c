@@ -116,24 +116,6 @@ void carve_room_and_corridor(struct drunkard *drunk)
 
     if (marked)
     {
-        bool made_door = false;
-
-        drunkard_tunnel_path_to_target(drunk);
-        while (drunkard_walk_path(drunk))
-        {
-            if (drunkard_is_on_opened(drunk))
-                break;
-
-            if (!made_door && map[drunkard_get_y(drunk)][drunkard_get_x(drunk)] < STONE_FLOOR)
-            {
-                made_door = true;
-                drunkard_mark_1(drunk, WOOD_DOOR);
-            }
-            else
-            {
-                drunkard_mark_1(drunk, STONE_FLOOR);
-            }
-        }
 
         if (drunkard_rng_chance(drunk, 0.3))
         {
@@ -177,6 +159,25 @@ void carve_room_and_corridor(struct drunkard *drunk)
                 }
             }
         }
+
+        bool made_door = false;
+
+        drunkard_tunnel_path_to_target(drunk);
+        while (drunkard_walk_path(drunk))
+        {
+            if (drunkard_is_on_opened(drunk))
+                break;
+
+            if (!made_door && map[drunkard_get_y(drunk)][drunkard_get_x(drunk)] < STONE_FLOOR)
+            {
+                made_door = true;
+                drunkard_mark_1(drunk, WOOD_DOOR);
+            }
+            else
+            {
+                drunkard_mark_1(drunk, STONE_FLOOR);
+            }
+        }
     }
 end:
 
@@ -197,7 +198,7 @@ void carve_randomly(struct drunkard *drunk)
     while (!drunkard_is_on_opened(drunk))
     {
         drunkard_mark_plus(drunk, tile);
-        drunkard_step_to_target(drunk, 0.55);
+        drunkard_step_to_target(drunk, 0.51);
     }
 
     drunkard_flush_marks(drunk);
