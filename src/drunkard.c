@@ -751,8 +751,8 @@ void drunkard_step_random(struct drunkard *drunk)
  * not optimized... for now.
  *
  * The two cases you have in a four directional weighted walk is where the
- * walker is ON an axis that the target is on as well. Each case is handled
- * different.
+ * walker is ON an axis that the target is on, and when the walker is not...
+ * Each case is handled differently.
  *
  * === On a same axis ===
  *
