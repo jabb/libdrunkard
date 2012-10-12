@@ -97,9 +97,10 @@ int main(void)
 
 void output_map(unsigned map[HEIGHT][WIDTH])
 {
-    for (int y = 0; y < HEIGHT; ++y)
+    int x, y;
+    for (y = 0; y < HEIGHT; ++y)
     {
-        for (int x = 0; x < WIDTH; ++x)
+        for (x = 0; x < WIDTH; ++x)
         {
             printf("%c", map[y][x] ? '.' : '#');
         }

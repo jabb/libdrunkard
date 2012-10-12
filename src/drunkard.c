@@ -45,7 +45,8 @@ RNG.
 
 /* Medium speed. High memory. Period ~= 2^131104. */
 enum {CMWC_K = 4096};
-struct rng_state {
+struct rng_state
+{
     uint32_t q[CMWC_K];
     uint32_t c;
     uint32_t i;
@@ -53,8 +54,10 @@ struct rng_state {
 
 void rng_seed(struct rng_state *st, uint32_t seed)
 {
+    int i;
     srand(seed);
-    for (int i = 0; i < CMWC_K; ++i) {
+    for (i = 0; i < CMWC_K; ++i)
+    {
         st->q[i] = rand();
     }
     st->c = (seed < 809430660) ? seed : 809430660 - 1;
@@ -65,20 +68,23 @@ uint32_t rng_u32(struct rng_state *st)
 {
     uint32_t a = 18782;
     uint32_t r = 0xfffffffe;
+    uint32_t q, ql, qh, gl, tl, th;
+    uint32_t x;
 
     st->i = (st->i + 1) & (CMWC_K - 1);
 
-    uint32_t q = st->q[st->i];
-    uint32_t qh = q >> 16;
-    uint32_t ql = q & 0xffff;
+    q = st->q[st->i];
+    qh = q >> 16;
+    ql = q & 0xffff;
 
-    uint32_t tl = a * q + st->c;
-    uint32_t th = (a * qh + (((st->c & 0xffff) + a * ql) >> 16) + (st->c >> 16)) >> 16;
+    tl = a * q + st->c;
+    th = (a * qh + (((st->c & 0xffff) + a * ql) >> 16) + (st->c >> 16)) >> 16;
 
 
     st->c = th;
-    uint32_t x = tl + th;
-    if (x < st->c) {
+    x = tl + th;
+    if (x < st->c)
+    {
         x++;
         st->c++;
     }
@@ -115,7 +121,10 @@ bool rng_chance(struct rng_state *st, double ch)
 Point set.
 \******************************************************************************/
 
-struct point { int x, y; };
+struct point
+{
+    int x, y;
+};
 
 struct point make_point(int x, int y)
 {
@@ -363,7 +372,7 @@ void drunkard_flush_marks(struct drunkard *drunk)
     struct point *pi;
 
     POINTSET_FOR(drunk->markedset, i, pi)
-        pointset_add(drunk->openedset, *pi);
+    pointset_add(drunk->openedset, *pi);
 
     pointset_clear(drunk->markedset);
 }
@@ -666,8 +675,9 @@ Mark functions.
 
 void drunkard_mark_all(struct drunkard *drunk, unsigned tile)
 {
-    for (unsigned x = 0; x < drunk->width; ++x)
-        for (unsigned y = 0; y < drunk->height; ++y)
+    unsigned x, y;
+    for (x = 0; x < drunk->width; ++x)
+        for (y = 0; y < drunk->height; ++y)
             drunkard_mark(drunk, x, y, tile);
 }
 
@@ -696,20 +706,23 @@ void drunkard_mark_x(struct drunkard *drunk, unsigned tile)
 
 void drunkard_mark_rect(struct drunkard *drunk, int hw, int hh, unsigned tile)
 {
-    for (int x = ceil(drunk->x - hw); x <= floor(drunk->x + hw); ++x)
-        for (int y = ceil(drunk->y - hh); y <= floor(drunk->y + hh); ++y)
+    int x, y;
+    for (x = ceil(drunk->x - hw); x <= floor(drunk->x + hw); ++x)
+        for (y = ceil(drunk->y - hh); y <= floor(drunk->y + hh); ++y)
             drunkard_mark(drunk, x, y, tile);
 }
 
 void drunkard_mark_circle(struct drunkard *drunk, int r, unsigned tile)
 {
-    for (int dx = -r; dx <= r; ++dx)
+    int dx, dy, h, x, y;
+
+    for (dx = -r; dx <= r; ++dx)
     {
-        int h = floor(sqrt(r * r - dx * dx));
-        for (int dy = -h; dy <= h; ++dy)
+        h = floor(sqrt(r * r - dx * dx));
+        for (dy = -h; dy <= h; ++dy)
         {
-            int x = drunkard_get_x(drunk) + dx;
-            int y = drunkard_get_y(drunk) + dy;
+            x = drunkard_get_x(drunk) + dx;
+            y = drunkard_get_y(drunk) + dy;
             drunkard_mark(drunk, x, y, tile);
         }
     }
@@ -732,7 +745,8 @@ void drunkard_step_by(struct drunkard *drunk, int dx, int dy)
 
 void drunkard_step_random(struct drunkard *drunk)
 {
-    int dirs[9][2] = {
+    int dirs[9][2] =
+    {
         {-1,  0},
         { 0, -1},
         { 0,  1},
@@ -1051,8 +1065,9 @@ bool drunkard_is_on_marked(struct drunkard *drunk)
 
 bool drunkard_is_opened_on_rect(struct drunkard *drunk, unsigned hw, unsigned hh)
 {
-    for (int x = ceil(drunk->x - hw) - 1; x <= floor(drunk->x + hw) + 1; ++x)
-        for (int y = ceil(drunk->y - hh) - 1; y <= floor(drunk->y + hh) + 1; ++y)
+    int x, y;
+    for (x = ceil(drunk->x - hw) - 1; x <= floor(drunk->x + hw) + 1; ++x)
+        for (y = ceil(drunk->y - hh) - 1; y <= floor(drunk->y + hh) + 1; ++y)
             if (!IN_BOUNDS(drunk, x, y) || drunkard_is_opened(drunk, x, y))
                 return true;
     return false;
@@ -1060,13 +1075,14 @@ bool drunkard_is_opened_on_rect(struct drunkard *drunk, unsigned hw, unsigned hh
 
 bool drunkard_is_opened_on_circle(struct drunkard *drunk, unsigned r)
 {
-    for (int dx = -(int)r; dx <= (int)r; ++dx)
+    int dx, dy, h, x, y;
+    for (dx = -(int)r; dx <= (int)r; ++dx)
     {
-        int h = floor(sqrt(r * r - dx * dx));
-        for (int dy = -h; dy <= h; ++dy)
+        h = floor(sqrt(r * r - dx * dx));
+        for (dy = -h; dy <= h; ++dy)
         {
-            int x = drunkard_get_x(drunk) + dx;
-            int y = drunkard_get_y(drunk) + dy;
+            x = drunkard_get_x(drunk) + dx;
+            y = drunkard_get_y(drunk) + dy;
             if (!IN_BOUNDS(drunk, x, y) || drunkard_is_opened(drunk, x, y))
                 return true;
         }

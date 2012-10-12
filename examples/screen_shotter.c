@@ -107,7 +107,8 @@ void carve_room_and_corridor(struct drunkard *drunk)
     drunkard_start_random(drunk);
     drunkard_target_random_opened(drunk);
 
-    int marked;
+    bool made_door;
+    int x, y, marked;
 
     if (drunkard_rng_chance(drunk, 0.5))
         marked = carve_shrinking_square(drunk, 3, 8, STONE_FLOOR);
@@ -119,9 +120,9 @@ void carve_room_and_corridor(struct drunkard *drunk)
 
         if (drunkard_rng_chance(drunk, 0.3))
         {
-            for (int x = drunkard_get_x(drunk) - abs(marked); x <= drunkard_get_x(drunk) + abs(marked); ++x)
+            for (x = drunkard_get_x(drunk) - abs(marked); x <= drunkard_get_x(drunk) + abs(marked); ++x)
             {
-                for (int y = drunkard_get_y(drunk) - abs(marked); y <= drunkard_get_y(drunk) + abs(marked); ++y)
+                for (y = drunkard_get_y(drunk) - abs(marked); y <= drunkard_get_y(drunk) + abs(marked); ++y)
                 {
                     if (x >= 0 && y >= 0 && x < WIDTH && y < HEIGHT)
                     {
@@ -141,9 +142,9 @@ void carve_room_and_corridor(struct drunkard *drunk)
         }
         else if (drunkard_rng_chance(drunk, 0.2))
         {
-            for (int x = drunkard_get_x(drunk) - abs(marked); x <= drunkard_get_x(drunk) + abs(marked); ++x)
+            for (x = drunkard_get_x(drunk) - abs(marked); x <= drunkard_get_x(drunk) + abs(marked); ++x)
             {
-                for (int y = drunkard_get_y(drunk) - abs(marked); y <= drunkard_get_y(drunk) + abs(marked); ++y)
+                for (y = drunkard_get_y(drunk) - abs(marked); y <= drunkard_get_y(drunk) + abs(marked); ++y)
                 {
                     if (x >= 0 && y >= 0 && x < WIDTH && y < HEIGHT)
                     {
@@ -160,7 +161,7 @@ void carve_room_and_corridor(struct drunkard *drunk)
             }
         }
 
-        bool made_door = false;
+        made_door = false;
 
         drunkard_tunnel_path_to_target(drunk);
         while (drunkard_walk_path(drunk))
@@ -214,6 +215,8 @@ void carve(struct drunkard *drunk)
 
 void post_carve(struct drunkard *drunk)
 {
+    unsigned x, y, tile, i;
+    int nx, ny;
     int neighbors[4][2] = {
         {-1,  0},
         { 0, -1},
@@ -221,28 +224,28 @@ void post_carve(struct drunkard *drunk)
         { 1,  0}
     };
 
-    for (unsigned x = 0; x < WIDTH; ++x)
+    for (x = 0; x < WIDTH; ++x)
     {
-        for (unsigned y = 0; y < HEIGHT; ++y)
+        for (y = 0; y < HEIGHT; ++y)
         {
             if (map[y][x] == DIRT_FLOOR)
             {
-                for (unsigned i = 0; i < 4; ++i)
+                for (i = 0; i < 4; ++i)
                 {
-                    int nx = x + neighbors[i][0];
-                    int ny = y + neighbors[i][1];
-                    unsigned tile = map[ny][nx];
+                    nx = x + neighbors[i][0];
+                    ny = y + neighbors[i][1];
+                    tile = map[ny][nx];
                     if (tile == STONE_WALL)
                         drunkard_mark(drunk, nx, ny, DIRT_WALL);
                 }
             }
             else if (map[y][x] == ALIEN_FLOOR)
             {
-                for (unsigned i = 0; i < 4; ++i)
+                for (i = 0; i < 4; ++i)
                 {
-                    int nx = x + neighbors[i][0];
-                    int ny = y + neighbors[i][1];
-                    unsigned tile = map[ny][nx];
+                    nx = x + neighbors[i][0];
+                    ny = y + neighbors[i][1];
+                    tile = map[ny][nx];
                     if (tile == STONE_WALL)
                         drunkard_mark(drunk, nx, ny, DIRT_WALL);
                 }
@@ -277,12 +280,14 @@ void generate_dungeon(struct drunkard *drunk)
 
 void generate_fov(struct drunkard *drunk, TCOD_map_t fov, bool explored[HEIGHT][WIDTH])
 {
+    struct tile_type t;
+    unsigned x, y;
     (void)drunk;
-    for (unsigned x = 0; x < WIDTH; ++x)
+    for (x = 0; x < WIDTH; ++x)
     {
-        for (unsigned y = 0; y < HEIGHT; ++y)
+        for (y = 0; y < HEIGHT; ++y)
         {
-            struct tile_type t = tiles[map[y][x]];
+            t = tiles[map[y][x]];
             TCOD_map_set_properties(fov, x, y, !t.blocks_light, !t.blocks_movement);
             explored[y][x] = false;
         }
@@ -291,10 +296,10 @@ void generate_fov(struct drunkard *drunk, TCOD_map_t fov, bool explored[HEIGHT][
 
 int main(int argc, char *argv[])
 {
+    unsigned x, y, tile, s;
     struct drunkard *drunk = drunkard_create((void *)map, WIDTH, HEIGHT);
     drunkard_set_open_threshold(drunk, STONE_FLOOR);
 
-    unsigned s;
     if (argc == 2)
         s = atoi(argv[1]);
     else
@@ -352,8 +357,8 @@ int main(int argc, char *argv[])
             }
             else if (key.c == 's')
             {
-                for (unsigned x = 0; x < WIDTH; ++x)
-                    for (unsigned y = 0; y < HEIGHT; ++y)
+                for (x = 0; x < WIDTH; ++x)
+                    for (y = 0; y < HEIGHT; ++y)
                         explored[y][x] = true;
             }
             break;
@@ -366,11 +371,11 @@ int main(int argc, char *argv[])
 
         TCOD_console_clear(NULL);
 
-        for (unsigned x = 0; x < WIDTH; ++x)
+        for (x = 0; x < WIDTH; ++x)
         {
-            for (unsigned y = 0; y < HEIGHT; ++y)
+            for (y = 0; y < HEIGHT; ++y)
             {
-                unsigned tile = map[y][x];
+                tile = map[y][x];
                 if (TCOD_map_is_in_fov(fov_map, x, y))
                 {
                     draw_tile(x, y, tile, true);
