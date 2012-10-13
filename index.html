@@ -48,7 +48,7 @@
 </tr>
 </table><h2>Compiling Drunkard</h2>
 
-<p>On most systems, you can simply do <code>make &amp;&amp; make install</code> to get the library working on your computer. The library itself is very small, 57kb with debugging enabled.</p>
+<p>On most systems, you can simply do <code>cmake . &amp;&amp; make &amp;&amp; make install</code> to get the library working on your computer. The library itself is very small, ~62kb with debug symbols.</p>
 
 <p>If libdrunkard fails to compile on your system, feel free to contact me at my GitHub: <a href="https://github.com/jabb" class="user-mention">@jabb</a>.</p>
 
@@ -93,6 +93,7 @@ void drunkard_destroy(struct drunkard *drunk);
 void drunkard_set_open_threshold(struct drunkard *drunk, unsigned threshold);
 void drunkard_mark(struct drunkard *drunk, int x, int y, unsigned tile);
 void drunkard_flush_marks(struct drunkard *drunk);
+void drunkard_set_border(struct drunkard *drunk, bool tf);
 </code></pre>
 
 <p><code>drunkard_is_opened</code> checks the tile at <code>x, y</code> and returns true if it is opened (walkable).</p>
@@ -102,6 +103,8 @@ void drunkard_flush_marks(struct drunkard *drunk);
 <p><code>drunkard_mark</code> marks a tile. If the tile is an open one (walkable), it is added to the list of marked tiles. If the tile is closed (unwalkable), it is removed from the list of open tiles and list marked tiles.</p>
 
 <p><code>drunkard_flush_marks</code> flushes all the marked tiles to the list of open tiles. The marked list is then cleared.</p>
+
+<p><code>drunkard_set_border</code> if set to true, pads the generator so it doesn't touch the outer walls.</p>
 
 <h3>Querying Functions</h3>
 
