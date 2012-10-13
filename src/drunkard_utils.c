@@ -92,7 +92,7 @@ static int carve_shrinking_square(struct drunkard *drunk, int min, int max, unsi
     }
     return 0;
 }
-
+#if 0
 static int carve_shrinking_circle(struct drunkard *drunk, int min, int max, unsigned tile)
 {
     bool has_opened;
@@ -110,8 +110,8 @@ static int carve_shrinking_circle(struct drunkard *drunk, int min, int max, unsi
     }
     return 0;
 }
-
-static bool carve_cave(struct drunkard *drunk, void *args)
+#endif
+static void carve_cave(struct drunkard *drunk, void *args)
 {
     struct drunkard_generic_args *pargs = args;
 
@@ -127,7 +127,7 @@ static bool carve_cave(struct drunkard *drunk, void *args)
     drunkard_flush_marks(drunk);
 }
 
-static bool carve_room_then_corridor(struct drunkard *drunk, void *args)
+static void carve_room_then_corridor(struct drunkard *drunk, void *args)
 {
     struct drunkard_generic_args *pargs = args;
 

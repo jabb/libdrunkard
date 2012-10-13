@@ -62,13 +62,13 @@ struct drunkard_plans
 struct drunkard_plans drunkard_make_plans(void);
 void drunkard_unmake_plans(struct drunkard_plans *plans);
 
-bool drunkard_plans_add_cave(
+void drunkard_plans_add_cave(
     struct drunkard_plans *plans,
     unsigned weight,
     unsigned floor_tile,
     double wavey);
 
-bool drunkard_plans_add_room_and_corridor(
+void drunkard_plans_add_room_and_corridor(
     struct drunkard_plans *plans,
     unsigned weight,
     unsigned floor_tile,
