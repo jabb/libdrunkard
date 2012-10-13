@@ -54,9 +54,6 @@ target_link_libraries(cave drunkard m)
 add_executable(atw examples/atw.c)
 target_link_libraries(atw drunkard m)
 
-add_executable(cave2 examples/cave2.c)
-target_link_libraries(cave2 drunkard m)
-
 add_executable(dung examples/dung.c)
 target_link_libraries(dung drunkard m)
 

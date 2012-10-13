@@ -48,8 +48,7 @@ bool drunkard_is_marked(struct drunkard *drunk, int x, int y);
 void drunkard_set_open_threshold(struct drunkard *drunk, unsigned threshold);
 void drunkard_mark(struct drunkard *drunk, int x, int y, unsigned tile);
 void drunkard_flush_marks(struct drunkard *drunk);
-struct drunkard *drunkard_clone(struct drunkard *drunk);
-void drunkard_destroy_clone(struct drunkard *clone);
+void drunkard_set_border(struct drunkard *drunk, bool yes);
 
 /* Query the drunkard. */
 

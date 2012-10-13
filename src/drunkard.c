@@ -241,9 +241,11 @@ Drunkard.
 
 #define STACK_SIZE 256
 
-#define TILE_AT(w, x, y) (INDEX2((w)->tiles, x, y, (w)->width))
-#define IN_BOUNDS(w, x, y) \
-    ((x) >= 0 && (y) >= 0 && (x) < (int)(w)->width && (y) < (int)(w)->height)
+#define TILE_AT(d, x, y) (INDEX2((d)->tiles, x, y, (d)->width))
+#define IN_BOUNDS(d, x, y) \
+    (((d)->border) ? \
+    ((x) >= 1 && (y) >= 1 && (x) < (int)(d)->width - 1 && (y) < (int)(d)->height - 1) : \
+    ((x) >= 0 && (y) >= 0 && (x) < (int)(d)->width && (y) < (int)(d)->height))
 
 struct drunkard
 {
@@ -255,6 +257,12 @@ struct drunkard
     unsigned *tiles;
     unsigned width, height;
     unsigned open_threshold;
+
+    bool border;
+    int top;
+    int bot;
+    int left;
+    int right;
 
     int x, y;
     int target_x, target_y;
@@ -296,6 +304,13 @@ struct drunkard *drunkard_create(unsigned *tiles, unsigned w, unsigned h)
     drunk->width = w;
     drunk->height = h;
     drunk->open_threshold = 1;
+
+    drunk->border = false;
+    /* Real x, y, width, height borders. */
+    drunk->top = 0;
+    drunk->bot = drunk->height - 1;
+    drunk->left = 0;
+    drunk->right = drunk->width - 1;
 
     drunk->x = -1;
     drunk->y = -1;
@@ -377,25 +392,23 @@ void drunkard_flush_marks(struct drunkard *drunk)
     pointset_clear(drunk->markedset);
 }
 
-struct drunkard *drunkard_clone(struct drunkard *drunk)
+void drunkard_set_border(struct drunkard *drunk, bool yes)
 {
-    struct drunkard *clone = malloc(sizeof *clone);
-    if (!clone)
-        goto alloc_failure;
-
-    memcpy(clone, drunk, sizeof *clone);
-
-    return clone;
-
-alloc_failure:
-    if (clone)
-        free(clone);
-    return NULL;
-}
-
-void drunkard_destroy_clone(struct drunkard *clone)
-{
-    free(clone);
+    drunk->border = yes;
+    if (drunk->border)
+    {
+        drunk->top = 1;
+        drunk->bot = drunk->height - 2;
+        drunk->left = 1;
+        drunk->right = drunk->width - 2;
+    }
+    else
+    {
+        drunk->top = 0;
+        drunk->bot = drunk->height - 1;
+        drunk->left = 0;
+        drunk->right = drunk->width - 1;
+    }
 }
 
 unsigned drunkard_count_opened(struct drunkard *drunk)
@@ -491,56 +504,56 @@ void drunkard_start_fixed(struct drunkard *drunk, int x, int y)
 
 void drunkard_start_random(struct drunkard *drunk)
 {
-    drunk->x = drunkard_rng_range(drunk, 0, drunk->width - 1);
-    drunk->y = drunkard_rng_range(drunk, 0, drunk->height - 1);
+    drunk->x = drunkard_rng_range(drunk, drunk->left, drunk->right);
+    drunk->y = drunkard_rng_range(drunk, drunk->top, drunk->bot);
 }
 
 void drunkard_start_random_west(struct drunkard *drunk)
 {
-    drunk->x = drunkard_rng_range(drunk, 0, drunk->width / 2);
-    drunk->y = drunkard_rng_range(drunk, 0, drunk->height - 1);
+    drunk->x = drunkard_rng_range(drunk, drunk->left, drunk->right / 2);
+    drunk->y = drunkard_rng_range(drunk, drunk->top, drunk->bot);
 }
 
 void drunkard_start_random_east(struct drunkard *drunk)
 {
-    drunk->x = drunkard_rng_range(drunk, drunk->width / 2, drunk->width - 1);
-    drunk->y = drunkard_rng_range(drunk, 0, drunk->height - 1);
+    drunk->x = drunkard_rng_range(drunk, drunk->right / 2, drunk->right);
+    drunk->y = drunkard_rng_range(drunk, drunk->top, drunk->bot);
 }
 
 void drunkard_start_random_north(struct drunkard *drunk)
 {
-    drunk->x = drunkard_rng_range(drunk, 0, drunk->width - 1);
-    drunk->y = drunkard_rng_range(drunk, 0, drunk->height / 2);
+    drunk->x = drunkard_rng_range(drunk, drunk->left, drunk->right);
+    drunk->y = drunkard_rng_range(drunk, drunk->top, drunk->top / 2);
 }
 
 void drunkard_start_random_south(struct drunkard *drunk)
 {
-    drunk->x = drunkard_rng_range(drunk, 0, drunk->width - 1);
-    drunk->y = drunkard_rng_range(drunk, drunk->height / 2, drunk->height - 1);
+    drunk->x = drunkard_rng_range(drunk, drunk->left, drunk->right);
+    drunk->y = drunkard_rng_range(drunk, drunk->top / 2, drunk->top);
 }
 
 void drunkard_start_random_west_edge(struct drunkard *drunk)
 {
-    drunk->x = 0;
-    drunk->y = drunkard_rng_range(drunk, 0, drunk->height - 1);
+    drunk->x = drunk->left;
+    drunk->y = drunkard_rng_range(drunk, drunk->top, drunk->bot);
 }
 
 void drunkard_start_random_east_edge(struct drunkard *drunk)
 {
-    drunk->x = drunk->width - 1;
-    drunk->y = drunkard_rng_range(drunk, 0, drunk->height - 1);
+    drunk->x = drunk->right;
+    drunk->y = drunkard_rng_range(drunk, drunk->top, drunk->bot);
 }
 
 void drunkard_start_random_north_edge(struct drunkard *drunk)
 {
-    drunk->x = drunkard_rng_range(drunk, 0, drunk->width - 1);
-    drunk->y = 0;
+    drunk->x = drunkard_rng_range(drunk, drunk->left, drunk->right);
+    drunk->y = drunk->top;
 }
 
 void drunkard_start_random_south_edge(struct drunkard *drunk)
 {
-    drunk->x = drunkard_rng_range(drunk, 0, drunk->width - 1);
-    drunk->y = drunk->height - 1;
+    drunk->x = drunkard_rng_range(drunk, drunk->left, drunk->right);
+    drunk->y = drunk->bot;
 }
 
 void drunkard_start_random_westeast_edge(struct drunkard *drunk)
@@ -580,62 +593,56 @@ Targetting Functions.
 
 void drunkard_target_random(struct drunkard *drunk)
 {
-    drunk->target_x = drunkard_rng_range(drunk, 0, drunk->width - 1);
-    drunk->target_y = drunkard_rng_range(drunk, 0, drunk->height - 1);
+    drunk->target_x = drunkard_rng_range(drunk, drunk->left, drunk->right);
+    drunk->target_y = drunkard_rng_range(drunk, drunk->top, drunk->bot);
 }
 
 void drunkard_target_random_west(struct drunkard *drunk)
 {
-    drunk->target_x = drunkard_rng_range(drunk, 0, drunk->width / 2);
-    drunk->target_y = drunkard_rng_range(drunk, 0, drunk->height - 1);
+    drunk->target_x = drunkard_rng_range(drunk, drunk->left, drunk->right / 2);
+    drunk->target_y = drunkard_rng_range(drunk, drunk->top, drunk->bot);
 }
 
 void drunkard_target_random_east(struct drunkard *drunk)
 {
-    drunk->target_x = drunkard_rng_range(drunk, drunk->width / 2, drunk->width - 1);
-    drunk->target_y = drunkard_rng_range(drunk, 0, drunk->height - 1);
+    drunk->target_x = drunkard_rng_range(drunk, drunk->right / 2, drunk->right);
+    drunk->target_y = drunkard_rng_range(drunk, drunk->top, drunk->bot);
 }
 
 void drunkard_target_random_north(struct drunkard *drunk)
 {
-    drunk->target_x = drunkard_rng_range(drunk, 0, drunk->width - 1);
-    drunk->target_y = drunkard_rng_range(drunk, 0, drunk->height / 2);
+    drunk->target_x = drunkard_rng_range(drunk, drunk->left, drunk->right);
+    drunk->target_y = drunkard_rng_range(drunk, drunk->top, drunk->top / 2);
 }
 
 void drunkard_target_random_south(struct drunkard *drunk)
 {
-    drunk->target_x = drunkard_rng_range(drunk, 0, drunk->width - 1);
-    drunk->target_y = drunkard_rng_range(drunk, drunk->height / 2, drunk->height - 1);
-}
-
-void drunkard_target_fixed(struct drunkard *drunk, int x, int y)
-{
-    drunk->target_x = x;
-    drunk->target_y = y;
+    drunk->target_x = drunkard_rng_range(drunk, drunk->left, drunk->right);
+    drunk->target_y = drunkard_rng_range(drunk, drunk->top / 2, drunk->top);
 }
 
 void drunkard_target_random_west_edge(struct drunkard *drunk)
 {
-    drunk->target_x = 0;
-    drunk->target_y = drunkard_rng_range(drunk, 0, drunk->height - 1);
+    drunk->target_x = drunk->left;
+    drunk->target_y = drunkard_rng_range(drunk, drunk->top, drunk->bot);
 }
 
 void drunkard_target_random_east_edge(struct drunkard *drunk)
 {
-    drunk->target_x = drunk->width - 1;
-    drunk->target_y = drunkard_rng_range(drunk, 0, drunk->height - 1);
+    drunk->target_x = drunk->right;
+    drunk->target_y = drunkard_rng_range(drunk, drunk->top, drunk->bot);
 }
 
 void drunkard_target_random_north_edge(struct drunkard *drunk)
 {
-    drunk->target_x = drunkard_rng_range(drunk, 0, drunk->width - 1);
-    drunk->target_y = 0;
+    drunk->target_x = drunkard_rng_range(drunk, drunk->left, drunk->right);
+    drunk->target_y = drunk->top;
 }
 
 void drunkard_target_random_south_edge(struct drunkard *drunk)
 {
-    drunk->target_x = drunkard_rng_range(drunk, 0, drunk->width - 1);
-    drunk->target_y = drunk->height - 1;
+    drunk->target_x = drunkard_rng_range(drunk, drunk->left, drunk->right);
+    drunk->target_y = drunk->bot;
 }
 
 void drunkard_target_random_westeast_edge(struct drunkard *drunk)

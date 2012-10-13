@@ -97,7 +97,7 @@ int carve_shrinking_circle(struct drunkard *drunk, int min, int max, unsigned ti
 
 void carve_seed(struct drunkard *drunk)
 {
-    drunkard_start_fixed(drunk, 40, 12);
+    drunkard_start_fixed(drunk, WIDTH / 2, HEIGHT / 2);
     drunkard_mark_1(drunk, STONE_FLOOR);
     drunkard_flush_marks(drunk);
 }

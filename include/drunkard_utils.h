@@ -37,29 +37,44 @@ extern "C" {
 /******************************************************************************\
 \******************************************************************************/
 
-enum
-{
-    DRUNKARD_CAVE,
-    DRUNKARD_CORRIDOR,
-    DRUNKARD_ROOM_THEN_CORRIDOR
-};
+typedef bool drunkard_pattern_func(struct drunkard *drunk, void *args);
 
-struct drunkard_specs
+struct drunkard_pattern
 {
+    struct drunkard_pattern *prev;
+    drunkard_pattern_func *pattern_func;
+    void *args;
     unsigned weight;
-    unsigned type;
-    unsigned tiles[2];
 };
 
-struct drunkard_blueprint
+struct drunkard_plans
 {
-    struct drunkard_specs specs[16];
-    unsigned num_specs;
+    struct drunkard_pattern *patterns;
     double min_percent_open;
-    unsigned default_tile;
+    unsigned max_iterations;
+
+    unsigned first_open_tile;
+    unsigned default_wall_tile;
+    unsigned default_floor_tile;
+    bool border;
 };
 
-int drunkard_carve(struct drunkard *drunk, struct drunkard_blueprint *blue);
+struct drunkard_plans drunkard_make_plans(void);
+void drunkard_unmake_plans(struct drunkard_plans *plans);
+
+bool drunkard_plans_add_cave(
+    struct drunkard_plans *plans,
+    unsigned weight,
+    unsigned floor_tile,
+    double wavey);
+
+bool drunkard_plans_add_room_and_corridor(
+    struct drunkard_plans *plans,
+    unsigned weight,
+    unsigned floor_tile,
+    unsigned minsize, unsigned maxsize);
+
+void drunkard_carve_plans(struct drunkard *drunk, struct drunkard_plans *plans);
 
 #if defined(__cplusplus)
 }
