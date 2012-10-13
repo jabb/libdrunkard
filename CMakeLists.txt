@@ -9,6 +9,7 @@ set(CMAKE_MODULE_PATH
 
 set(SOURCES
     src/drunkard.c
+    src/drunkard_utils.c
 )
 
 include_directories(
@@ -23,6 +24,9 @@ add_library(
     drunkard
     ${SOURCES}
 )
+
+install_files(/include FILES include/drunkard.h include/drunkard_utils.h)
+install_files(/lib FILES lib/libdrunkard.a)
 
 # Examples
 
@@ -42,6 +46,8 @@ if(LIBTCOD_INCLUDE_DIRS)
     include_directories(${LIBTCOD_INCLUDE_DIRS})
 endif(LIBTCOD_INCLUDE_DIRS)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/examples)
+
 add_executable(cave examples/cave.c)
 target_link_libraries(cave drunkard m)
 
@@ -53,6 +59,9 @@ target_link_libraries(cave2 drunkard m)
 
 add_executable(dung examples/dung.c)
 target_link_libraries(dung drunkard m)
+
+add_executable(utils_example examples/utils_example.c)
+target_link_libraries(utils_example drunkard m)
 
 if(LIBTCOD_LIBRARIES)
     add_executable(screen_shotter examples/screen_shotter.c)
