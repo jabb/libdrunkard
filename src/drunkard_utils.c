@@ -241,7 +241,7 @@ failed:
 
 void drunkard_carve_plans(struct drunkard *drunk, struct drunkard_plans *plans)
 {
-    unsigned max_weight = 0, i;
+    unsigned max_weight = 0, i = 0;
     int r;
 
     struct drunkard_pattern *patt = plans->patterns;
