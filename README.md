@@ -19,3 +19,10 @@ Documentation (WIP)
 ===================
 
 [libdrunkard documentation](http://jabb.github.com/libdrunkard)
+
+News
+====
+
+A more streamlined version of this library is currently in development, check back here for updates on the reposity's location.
+
+
